@@ -1,0 +1,71 @@
+# ==============================================================================
+# MIRZA LIVE SERVER v1 - MASTER CONFIGURATION
+# ==============================================================================
+# This configuration file defines global server behavior, hardware monitoring
+# thresholds, and multi-channel YouTube livestreaming parameters.
+#
+# ENVIRONMENT VARIABLE SUBSTITUTION:
+# Use ${ENV_VAR_NAME} or ${ENV_VAR_NAME:default_value} to inject variables
+# safely from your system environment or '.env' file without hardcoding secrets.
+# ==============================================================================
+
+server:
+  # Global logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  log_level: ${MIRZA_LOG_LEVEL:INFO}
+  # Path or command for FFmpeg (defaults to 'ffmpeg' in system PATH)
+  ffmpeg_path: ${MIRZA_FFMPEG_PATH:ffmpeg}
+
+monitoring:
+  # Hardware CPU/RAM monitoring thresholds (in percentage)
+  cpu_max_percent: 85.0
+  ram_max_percent: 90.0
+  # Interval in seconds to sample system metrics via psutil
+  check_interval_seconds: 10
+
+# ==============================================================================
+# CHANNELS CONFIGURATION
+# ==============================================================================
+# You can run 1 channel now and scale to multiple concurrent channels simply
+# by adding entries below. Each channel runs in its own supervisor loop.
+# ==============================================================================
+channels:
+  - channel_id: channel_main
+    name: "Mirza Main Channel (24/7 Lo-Fi / Gameplay)"
+    enabled: true
+    
+    # RTMP endpoint and Stream Key reference loaded from .env
+    rtmp_url: ${YOUTUBE_RTMP_URL:rtmp://a.rtmp.youtube.com/live2}
+    stream_key: ${YOUTUBE_STREAM_KEY_MAIN}
+    
+    # Automatic Media Folder Detection path (relative or absolute)
+    # The engine will auto-scan for .mp4, .mkv, .mov, .flv in this folder.
+    media_folder: media/channel_main
+    
+    # Strict YouTube Live video encoding parameters
+    # Note: GOP (Keyframe interval) is automatically calculated by the engine as (2 * fps)
+    video_encoding:
+      resolution: "1920x1080"
+      fps: 30
+      bitrate_kbps: 4500
+      preset: veryfast
+      pix_fmt: yuv420p
+    
+    # Strict YouTube Live audio encoding parameters
+    audio_encoding:
+      bitrate_kbps: 128
+      sample_rate_hz: 44100
+      channels: 2
+    
+    # Playlist behavior settings
+    playlist_settings:
+      shuffle: true
+      loop: true
+      # TODO(v2): Add transition support (e.g., crossfade, overlay watermark)
+      transition: none
+    
+    # Process supervision & auto-restart policy if FFmpeg drops or exits
+    restart_policy:
+      max_retries: 0                  # 0 = infinite retries (ideal for 24/7 streams)
+      retry_delay_seconds: 5          # Base initial delay before restarting
+      backoff_multiplier: 2.0         # Exponential backoff multiplier on consecutive crashes
+      max_retry_delay_seconds: 60     # Maximum cap for retry delay
