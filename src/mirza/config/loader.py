@@ -167,7 +167,10 @@ def save_config(
     # Convert Pydantic model to clean dictionary representation
     data = app_config.model_dump(mode="python", exclude_none=True)
 
-    with open(config_path, "w", encoding="utf-8") as file:
+    # Write to temporary file first and atomically replace to guarantee crash safety
+    temp_path = config_path.with_name(f"{config_path.name}.tmp")
+    with open(temp_path, "w", encoding="utf-8") as file:
         yaml.dump(data, file, default_flow_style=False, sort_keys=False)
 
+    temp_path.replace(config_path)
     return config_path

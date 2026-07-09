@@ -44,7 +44,7 @@ _FPS_REGEX = re.compile(r"fps=\s*([\d\.]+)")
 _BITRATE_REGEX = re.compile(r"bitrate=\s*([\d\.]+)kbits/s")
 _SPEED_REGEX = re.compile(r"speed=\s*([\d\.]+)x")
 
-# Known network interruption substrings emitted by FFmpeg RTMP/TCP layers
+# Known network interruption substrings emitted by FFmpeg RTMP/TCP layers across POSIX and Windows
 _NETWORK_ERROR_SIGNATURES = (
     "Connection reset by peer",
     "RTMP_Connect0, failed to connect",
@@ -55,6 +55,14 @@ _NETWORK_ERROR_SIGNATURES = (
     "Connection timed out",
     "Network is unreachable",
     "Input/output error",
+    "WSAGetLastError",
+    "WSAECONNRESET",
+    "10054",
+    "No route to host",
+    "Host is down",
+    "Error in the pull function",
+    "rtmp server sent error",
+    "EOF on socket",
 )
 
 

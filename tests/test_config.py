@@ -4,6 +4,7 @@ Tests Pydantic validation constraints, environment variable regex substitution,
 and multi-channel YAML loading behavior.
 """
 
+import logging
 import os
 from pathlib import Path
 import pytest
@@ -128,3 +129,18 @@ def test_setup_logging_and_channel_logger(tmp_path: Path) -> None:
 
     # Check that handler files exist or can be created cleanly
     assert (tmp_path / "test_server.log").exists() or len(logger.handlers) > 0
+
+
+def test_mirza_context_filter_injection() -> None:
+    """Verifies MirzaContextFilter attaches `[Session: <id>]` and `[Channel: <id>]` cleanly to records."""
+    from mirza.logger import MirzaContextFilter
+
+    ctx_filter = MirzaContextFilter()
+    record_channel = logging.LogRecord("mirza.channel.channel_main", logging.INFO, "test.py", 10, "hello", (), None)
+    assert ctx_filter.filter(record_channel) is True
+    assert "[Session:" in record_channel.context_prefix
+    assert "[Channel: channel_main]" in record_channel.context_prefix
+
+    record_sys = logging.LogRecord("mirza.orchestrator", logging.INFO, "test.py", 20, "system msg", (), None)
+    assert ctx_filter.filter(record_sys) is True
+    assert "[System]" in record_sys.context_prefix

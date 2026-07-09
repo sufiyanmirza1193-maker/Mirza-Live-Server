@@ -231,15 +231,18 @@ def handle_doctor(config_path: Path) -> int:
         print(f" [FAIL] Master Configuration File missing at: {config_path.resolve()}")
         has_failures = True
 
-    # 3. Check Required Folders & Permissions
+    # 3. Check Required Folders & Read/Write/Execute Permissions
     required_dirs = ["config", "media", "logs", "playlists", "bin"]
     for dir_name in required_dirs:
         dir_path = Path(dir_name)
         dir_path.mkdir(parents=True, exist_ok=True)
-        if os.access(dir_path, os.W_OK):
-            print(f" [PASS] Required Directory Read/Write check: '{dir_path.resolve()}'")
+        is_readable = os.access(dir_path, os.R_OK)
+        is_writable = os.access(dir_path, os.W_OK)
+        is_executable = os.access(dir_path, os.X_OK)
+        if is_readable and is_writable and is_executable:
+            print(f" [PASS] Required Directory Read/Write/Execute check: '{dir_path.resolve()}'")
         else:
-            print(f" [FAIL] Directory '{dir_path.resolve()}' is not writable!")
+            print(f" [FAIL] Directory '{dir_path.resolve()}' permissions invalid! (R:{is_readable} W:{is_writable} X:{is_executable})")
             has_failures = True
 
     # 4. Check Disk Space
@@ -247,10 +250,10 @@ def handle_doctor(config_path: Path) -> int:
         import psutil
         usage = psutil.disk_usage(str(Path.cwd().resolve()))
         free_gb = usage.free / (1024 ** 3)
-        if free_gb >= 5.0:
-            print(f" [PASS] Available Disk Space: {free_gb:.1f} GB free")
+        if free_gb >= 2.0:
+            print(f" [PASS] Available Disk Space: {free_gb:.1f} GB free (> 2.0 GB safety margin)")
         else:
-            print(f" [WARN] Low Disk Space: {free_gb:.1f} GB free (Recommended >= 5 GB for logs/cache)")
+            print(f" [WARN] Low Disk Space: {free_gb:.1f} GB free (Recommended >= 2.0 GB for logs/cache)")
     except Exception as exc:
         print(f" [WARN] Could not inspect disk space: {exc}")
 
@@ -372,7 +375,7 @@ def handle_verify(config_path: Path) -> int:
 
 
 async def handle_start_async(config_path: Path, channel_id: Optional[str]) -> int:
-    """Asynchronously starts and supervises the livestreaming channels.
+    """Asynchronously starts and supervises the livestreaming channels under single-instance lock.
 
     Args:
         config_path: Path to the configuration YAML file.
@@ -383,6 +386,7 @@ async def handle_start_async(config_path: Path, channel_id: Optional[str]) -> in
     """
     try:
         from mirza.config.loader import load_config
+        from mirza.engine.lock import InstanceAlreadyRunningError, InstanceLock
         from mirza.engine.orchestrator import Orchestrator
         from mirza.logger import setup_logging
 
@@ -390,25 +394,31 @@ async def handle_start_async(config_path: Path, channel_id: Optional[str]) -> in
         setup_logging(app_config.server.log_level)
         logger = logging.getLogger("mirza.cli")
 
-        logger.info("Initializing Mirza Live Server Engine (v1)...")
-        orchestrator = Orchestrator(app_config)
-
-        # Start targeted or all enabled channels
-        await orchestrator.start_channels(target_channel_id=channel_id)
-
-        if not orchestrator.has_active_channels():
-            logger.warning("No active channels running. Exiting server.")
-            return 0
-
-        # Run continuously until interrupted via KeyboardInterrupt or OS signals
+        logger.info("Acquiring single-instance production lock (`logs/mirza.lock`)...")
         try:
-            while orchestrator.has_active_channels():
-                await asyncio.sleep(1.0)
-        except asyncio.CancelledError:
-            logger.info("Shutdown requested via cancellation signal.")
-        finally:
-            logger.info("Gracefully stopping all active livestream channels...")
-            await orchestrator.stop_all()
+            with InstanceLock(logger=logger):
+                logger.info("Initializing Mirza Live Server Engine (v1)...")
+                orchestrator = Orchestrator(app_config)
+
+                # Start targeted or all enabled channels
+                await orchestrator.start_channels(target_channel_id=channel_id)
+
+                if not orchestrator.has_active_channels():
+                    logger.warning("No active channels running. Exiting server.")
+                    return 0
+
+                # Run continuously until interrupted via KeyboardInterrupt or OS signals
+                try:
+                    while orchestrator.has_active_channels():
+                        await asyncio.sleep(1.0)
+                except asyncio.CancelledError:
+                    logger.info("Shutdown requested via cancellation signal.")
+                finally:
+                    logger.info("Gracefully stopping all active livestream channels...")
+                    await orchestrator.stop_all()
+        except InstanceAlreadyRunningError as lock_err:
+            print(f"\nFatal Error: {lock_err}\nExiting without starting duplicate stream instance.", file=sys.stderr)
+            return 1
 
         return 0
     except KeyboardInterrupt:

@@ -158,7 +158,18 @@ Mirza Live Server incorporates hardened production capabilities to guarantee con
 
 ---
 
-## 🛠️ Troubleshooting & Common Issues
+## 📚 Production Documentation & Guides (`docs/`)
+
+For deep-dive technical operations, deployment architectures, and post-mortem analysis, consult our comprehensive production manuals:
+
+- [Production Deployment Guide (`docs/DEPLOYMENT_GUIDE.md`)](file:///C:/live%20channel/mirza_live_server/docs/DEPLOYMENT_GUIDE.md): Step-by-step Windows Server bare-metal setup, Windows Task Scheduler unattended startup, and Docker Compose single/multi-container orchestration.
+- [Troubleshooting & Diagnostic Guide (`docs/TROUBLESHOOTING_GUIDE.md`)](file:///C:/live%20channel/mirza_live_server/docs/TROUBLESHOOTING_GUIDE.md): Resolution procedures for common runtime symptoms (`Stream freeze`, `Lockfile collisions`, `Corrupted media header`, `RTMP 403 access denied`) and structured log interpretation.
+- [Automated Recovery & Self-Healing Guide (`docs/RECOVERY_GUIDE.md`)](file:///C:/live%20channel/mirza_live_server/docs/RECOVERY_GUIDE.md): Architectural deep dive into `StreamHealthMonitor` freeze traps, exponential backoff formulas ($2^{\text{attempts}} \times 2\text{s}$), atomic `config.yaml.tmp -> replace()` configuration guarantees, and post-mortem JSON crash trace evaluation.
+- [Version 1 Code Review & Architectural Audit (`docs/CODE_REVIEW_v1.md`)](file:///C:/live%20channel/mirza_live_server/docs/CODE_REVIEW_v1.md): Comprehensive review report detailing architectural strengths, security hardening measures, and SOLID conformance.
+
+---
+
+## 🛠️ Quick Troubleshooting & Common Issues
 
 - **`FFmpeg not found` error**: Ensure `ffmpeg.exe` is placed in your Windows `PATH` or set `MIRZA_FFMPEG_PATH=C:/ffmpeg/bin/ffmpeg.exe` in your `.env` file.
 - **YouTube Stream Disconnects or Buffers**:

@@ -9,6 +9,7 @@ import logging
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
 from typing import Optional
+import uuid
 
 # Attempt to import colorlog for colored terminal output; fallback cleanly if absent
 try:
@@ -19,10 +20,32 @@ except ImportError:
     _HAS_COLORLOG = False
 
 
-# Default log formatting patterns with precise millisecond timestamps
-_CONSOLE_FORMAT = "%(asctime)s.%(msecs)03d | %(levelname)-8s | %(name)s | %(message)s"
-_FILE_FORMAT = "%(asctime)s.%(msecs)03d | %(levelname)-8s | %(name)-24s | %(funcName)s:%(lineno)d | %(message)s"
-_COLOR_FORMAT = "%(log_color)s%(asctime)s.%(msecs)03d | %(levelname)-8s | %(name)s | %(message)s"
+_GLOBAL_SESSION_ID = uuid.uuid4().hex[:8]
+
+
+class MirzaContextFilter(logging.Filter):
+    """Injects `[Session: <id>]` and `[Channel: <id>]` structured context headers into log records."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        session_header = f"[Session: {_GLOBAL_SESSION_ID}]"
+        
+        channel_header = "[System]"
+        parts = record.name.split(".")
+        if len(parts) >= 3 and parts[1] in ("channel", "ffmpeg", "monitor"):
+            channel_header = f"[Channel: {parts[2]}]"
+        elif len(parts) >= 4 and parts[2] == "health":
+            channel_header = f"[Channel: {parts[3]}]"
+            
+        record.session_id = _GLOBAL_SESSION_ID
+        record.channel_header = channel_header
+        record.context_prefix = f"{session_header} {channel_header}"
+        return True
+
+
+# Default log formatting patterns with precise millisecond timestamps and structured context headers
+_CONSOLE_FORMAT = "%(asctime)s.%(msecs)03d | %(levelname)-8s | %(context_prefix)-28s | %(name)s | %(message)s"
+_FILE_FORMAT = "%(asctime)s.%(msecs)03d | %(levelname)-8s | %(context_prefix)-28s | %(name)-24s | %(funcName)s:%(lineno)d | %(message)s"
+_COLOR_FORMAT = "%(log_color)s%(asctime)s.%(msecs)03d | %(levelname)-8s | %(context_prefix)-28s | %(name)s | %(message)s"
 _DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
@@ -37,6 +60,7 @@ def _create_console_handler(level: int) -> logging.Handler:
     """
     console_handler = logging.StreamHandler()
     console_handler.setLevel(level)
+    console_handler.addFilter(MirzaContextFilter())
 
     if _HAS_COLORLOG:
         formatter = colorlog.ColoredFormatter(
@@ -81,6 +105,7 @@ def _create_timed_rotating_file_handler(
         encoding="utf-8",
     )
     file_handler.setLevel(level)
+    file_handler.addFilter(MirzaContextFilter())
     formatter = logging.Formatter(_FILE_FORMAT, datefmt=_DATE_FORMAT)
     file_handler.setFormatter(formatter)
     return file_handler
@@ -112,6 +137,7 @@ def _create_rotating_file_handler(
         encoding="utf-8",
     )
     file_handler.setLevel(level)
+    file_handler.addFilter(MirzaContextFilter())
     formatter = logging.Formatter(_FILE_FORMAT, datefmt=_DATE_FORMAT)
     file_handler.setFormatter(formatter)
     return file_handler
@@ -135,6 +161,9 @@ def setup_logging(
     numeric_level = getattr(logging, log_level.upper(), logging.INFO)
     root_logger = logging.getLogger("mirza")
     root_logger.setLevel(numeric_level)
+
+    if not any(isinstance(f, MirzaContextFilter) for f in root_logger.filters):
+        root_logger.addFilter(MirzaContextFilter())
 
     # Avoid duplicating handlers if setup_logging is invoked multiple times
     if root_logger.handlers:
@@ -170,6 +199,9 @@ def get_channel_logger(
         logging.Logger: Specialized logger for the channel (`mirza.channel.<id>`).
     """
     channel_logger = logging.getLogger(f"mirza.channel.{channel_id}")
+
+    if not any(isinstance(f, MirzaContextFilter) for f in channel_logger.filters):
+        channel_logger.addFilter(MirzaContextFilter())
 
     if log_level is not None:
         numeric_level = getattr(logging, log_level.upper(), logging.INFO)
@@ -211,6 +243,9 @@ def get_ffmpeg_logger(
     """
     ffmpeg_logger = logging.getLogger(f"mirza.ffmpeg.{channel_id}")
     ffmpeg_logger.setLevel(logging.INFO)
+
+    if not any(isinstance(f, MirzaContextFilter) for f in ffmpeg_logger.filters):
+        ffmpeg_logger.addFilter(MirzaContextFilter())
 
     ffmpeg_log_filename = f"{channel_id}_ffmpeg.log"
     has_file_handler = any(
