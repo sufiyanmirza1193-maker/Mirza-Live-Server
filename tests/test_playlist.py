@@ -5,6 +5,7 @@ video drop detection, shuffling, looping, and FFmpeg concat file generation.
 """
 
 from pathlib import Path
+from unittest.mock import patch
 import pytest
 
 from mirza.config.models import PlaylistSettings
@@ -38,7 +39,8 @@ def test_unsupported_file_extension_raises(tmp_path: Path) -> None:
     assert "Unsupported video file extension '.txt'" in str(exc_info.value)
 
 
-def test_media_detector_scan_and_changes(tmp_path: Path) -> None:
+@patch("mirza.playlist.validator.MediaValidator.validate_file", return_value=(True, "Valid"))
+def test_media_detector_scan_and_changes(mock_validate, tmp_path: Path) -> None:
     """Verifies scanning directory and detecting added/removed files across loops."""
     media_dir = tmp_path / "channel_test"
     detector = MediaDetector(media_folder=media_dir)
@@ -76,7 +78,8 @@ def test_playlist_manager_empty_raises(tmp_path: Path) -> None:
         manager.refresh_playlist()
 
 
-def test_playlist_manager_sequential_and_looping(tmp_path: Path) -> None:
+@patch("mirza.playlist.validator.MediaValidator.validate_file", return_value=(True, "Valid"))
+def test_playlist_manager_sequential_and_looping(mock_validate, tmp_path: Path) -> None:
     """Verifies sequential playback advancing and loop cycle incrementing."""
     media_dir = tmp_path / "seq_media"
     media_dir.mkdir()
@@ -105,7 +108,8 @@ def test_playlist_manager_sequential_and_looping(tmp_path: Path) -> None:
     assert manager.current_index == 1
 
 
-def test_generate_concat_file_windows_syntax(tmp_path: Path) -> None:
+@patch("mirza.playlist.validator.MediaValidator.validate_file", return_value=(True, "Valid"))
+def test_generate_concat_file_windows_syntax(mock_validate, tmp_path: Path) -> None:
     """Verifies that generated concat.txt contains clean file 'C:/...' syntax."""
     media_dir = tmp_path / "concat_media"
     media_dir.mkdir()
@@ -126,3 +130,4 @@ def test_generate_concat_file_windows_syntax(tmp_path: Path) -> None:
     assert "file '" in content
     assert "\\" not in content  # No unescaped backslashes allowed
     assert "clip1.mp4" in content and "clip2.mkv" in content
+

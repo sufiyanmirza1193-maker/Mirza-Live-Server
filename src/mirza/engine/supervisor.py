@@ -1,19 +1,23 @@
 """Asynchronous process supervisor and auto-recovery loop.
 
-Spawns and monitors individual FFmpeg child processes (`asyncio`), consumes standard
-error streams for real-time telemetry, checks freeze timeouts, and executes
-exponential backoff auto-restarts upon unexpected crash or network stall.
+Spawns and monitors individual FFmpeg child processes (`asyncio`), isolates raw
+stderr telemetry into `_ffmpeg.log`, detects freeze timeouts and network drops,
+generates structured JSON crash reports, and executes exponential backoff restarts.
 """
 
 import asyncio
+import json
 import logging
+import time
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Optional
 
 from mirza.config.models import ChannelConfig, MonitoringConfig, ServerConfig
+from mirza.engine.crash_report import CrashReport, save_crash_report
 from mirza.engine.ffmpeg_cmd import build_ffmpeg_command, get_windows_creation_flags, mask_command_secrets
-from mirza.logger import get_channel_logger
+from mirza.logger import get_channel_logger, get_ffmpeg_logger
 from mirza.monitor.health import StreamHealthMonitor
 from mirza.monitor.system import SystemHealthMonitor
 from mirza.playlist.detector import MediaDetector
@@ -38,6 +42,7 @@ class ChannelSupervisor:
         server_config: Global server paths (`ServerConfig`).
         monitoring_config: Hardware alert limits (`MonitoringConfig`).
         logger: Specialized rotating file logger (`logs/<channel_id>.log`).
+        ffmpeg_logger: Isolated raw FFmpeg telemetry logger (`logs/<channel_id>_ffmpeg.log`).
     """
 
     def __init__(
@@ -59,6 +64,7 @@ class ChannelSupervisor:
         self.server_config = server_config
         self.monitoring_config = monitoring_config
         self.logger = logger or get_channel_logger(channel_config.channel_id)
+        self.ffmpeg_logger = get_ffmpeg_logger(channel_config.channel_id)
 
         # Initialize internal domain subsystems
         self.detector = MediaDetector(
@@ -88,6 +94,7 @@ class ChannelSupervisor:
         self._total_restarts: int = 0
         self._is_running: bool = False
         self._supervision_task: Optional[asyncio.Task] = None
+        self._last_stderr_lines: list[str] = []
 
     @property
     def state(self) -> SupervisorState:
@@ -129,7 +136,32 @@ class ChannelSupervisor:
                 pass
 
         await self._terminate_process()
+        self._cleanup_temp_files_and_save_state()
         self.logger.info(f"ChannelSupervisor '{self.channel_config.channel_id}' stopped cleanly.")
+
+    def _cleanup_temp_files_and_save_state(self) -> None:
+        """Cleans up temporary concat files and persists state snapshot upon shutdown."""
+        try:
+            concat_path = self.playlist_manager.playlists_dir / f"concat_{self.channel_config.channel_id}.txt"
+            concat_path.unlink(missing_ok=True)
+            self.logger.debug(f"Cleaned up temporary concat file: {concat_path}")
+        except Exception as exc:
+            self.logger.debug(f"Error while deleting concat file: {exc}")
+
+        try:
+            logs_dir = Path("logs")
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            state_path = logs_dir / f"{self.channel_config.channel_id}_state.json"
+            state_data = {
+                "channel_id": self.channel_config.channel_id,
+                "name": self.channel_config.name,
+                "state": self._state.value,
+                "total_restarts": self._total_restarts,
+                "last_updated": datetime.now(timezone.utc).isoformat(),
+            }
+            state_path.write_text(json.dumps(state_data, indent=2), encoding="utf-8")
+        except Exception as exc:
+            self.logger.debug(f"Could not save state summary JSON: {exc}")
 
     async def _terminate_process(self) -> None:
         """Terminates the active child process, allowing up to 5 seconds before force kill."""
@@ -151,7 +183,7 @@ class ChannelSupervisor:
             self._process = None
 
     async def _consume_stderr(self, stderr_pipe: asyncio.StreamReader) -> None:
-        """Asynchronously reads FFmpeg stderr line-by-line and feeds telemetry to health monitor."""
+        """Asynchronously reads FFmpeg stderr line-by-line, isolating output and checking telemetry."""
         try:
             while not stderr_pipe.at_eof():
                 line_bytes = await stderr_pipe.readline()
@@ -159,12 +191,28 @@ class ChannelSupervisor:
                     break
                 line_str = line_bytes.decode("utf-8", errors="replace").strip()
                 if line_str:
+                    # Isolate raw FFmpeg output into logs/<channel_id>_ffmpeg.log
+                    self.ffmpeg_logger.info(line_str)
+
+                    # Maintain a small buffer of the last 15 lines for diagnostic crash reporting
+                    self._last_stderr_lines.append(line_str)
+                    if len(self._last_stderr_lines) > 15:
+                        self._last_stderr_lines.pop(0)
+
                     health_metrics = self.stream_monitor.parse_stderr_line(line_str)
-                    # If health check reports a freeze, log immediate alert
-                    if health_metrics and health_metrics.is_frozen:
-                        self.logger.error(
-                            f"[Supervisor] Stream freeze confirmed on '{self.channel_config.channel_id}'."
-                        )
+                    if health_metrics:
+                        if health_metrics.is_network_error:
+                            self.logger.error(
+                                f"[Supervisor] Network disconnect confirmed on '{self.channel_config.channel_id}'. Triggering restart."
+                            )
+                            await self._terminate_process()
+                            break
+                        if health_metrics.is_frozen:
+                            self.logger.error(
+                                f"[Supervisor] Stream freeze confirmed on '{self.channel_config.channel_id}'."
+                            )
+                            await self._terminate_process()
+                            break
         except asyncio.CancelledError:
             pass
         except Exception as exc:
@@ -177,8 +225,8 @@ class ChannelSupervisor:
                 await asyncio.sleep(self.monitoring_config.check_interval_seconds)
                 self.system_monitor.sample_metrics()
                 health = self.stream_monitor.check_health()
-                if health.is_frozen:
-                    self.logger.error(f"Freeze detected via periodic health check on '{self.channel_config.channel_id}'. Restarting...")
+                if health.is_frozen or health.is_network_error:
+                    self.logger.error(f"Issue detected via periodic health check on '{self.channel_config.channel_id}'. Restarting...")
                     await self._terminate_process()
                     break
         except asyncio.CancelledError:
@@ -194,10 +242,12 @@ class ChannelSupervisor:
         return min(float(delay), float(policy.max_retry_delay_seconds))
 
     async def _supervision_loop(self) -> None:
-        """Main supervision lifecycle loop: generates playlist, runs FFmpeg, and auto-restarts."""
+        """Main supervision lifecycle loop: generates playlist, runs FFmpeg, captures crashes, and auto-restarts."""
         while self._is_running:
             try:
                 self._state = SupervisorState.STARTING
+                self._last_stderr_lines.clear()
+
                 # Step 1: Generate Windows-safe concat playlist (`concat.txt`)
                 try:
                     concat_file = self.playlist_manager.generate_concat_file()
@@ -232,7 +282,7 @@ class ChannelSupervisor:
                 stderr_task = asyncio.create_task(self._consume_stderr(self._process.stderr))  # type: ignore
                 health_loop_task = asyncio.create_task(self._monitor_health_loop())
 
-                # Wait for child process to terminate naturally or via freeze trigger
+                # Wait for child process to terminate naturally or via freeze/network trigger
                 await self._process.wait()
 
                 # Cleanup background tasks
@@ -248,6 +298,40 @@ class ChannelSupervisor:
                     f"FFmpeg process for '{self.channel_config.channel_id}' exited unexpectedly (Return Code: {exit_code})."
                 )
 
+                # Determine restart reason and capture crash telemetry
+                health = self.stream_monitor.metrics
+                if health.is_network_error:
+                    reason = "NETWORK_INTERRUPTION"
+                elif health.is_frozen:
+                    reason = "STREAM_FREEZE"
+                elif not health.is_healthy:
+                    reason = "ENCODER_SLOWDOWN"
+                else:
+                    reason = "UNEXPECTED_EXIT"
+
+                # Sample hardware snapshot for diagnostic report
+                sys_metrics = self.system_monitor.sample_metrics()
+
+                current_item = None
+                if self.playlist_manager.items and self.playlist_manager.current_index > 0:
+                    try:
+                        current_item = self.playlist_manager.items[self.playlist_manager.current_index - 1].filename
+                    except IndexError:
+                        pass
+
+                crash_report = CrashReport(
+                    channel_id=self.channel_config.channel_id,
+                    exit_code=exit_code,
+                    current_media_file=current_item,
+                    cpu_percent=sys_metrics.cpu_percent,
+                    ram_percent=sys_metrics.ram_percent,
+                    ram_used_mb=sys_metrics.ram_used_mb,
+                    restart_reason=reason,
+                    last_stderr_lines=list(self._last_stderr_lines),
+                )
+                report_path = save_crash_report(crash_report)
+                self.logger.info(f"Saved crash diagnostic report to: {report_path}")
+
                 self._consecutive_failures += 1
                 self._total_restarts += 1
                 self._state = SupervisorState.RESTARTING
@@ -260,6 +344,7 @@ class ChannelSupervisor:
                     )
                     self._state = SupervisorState.FAILED
                     self._is_running = False
+                    self._cleanup_temp_files_and_save_state()
                     break
 
                 # Step 6: Apply exponential backoff delay before restarting

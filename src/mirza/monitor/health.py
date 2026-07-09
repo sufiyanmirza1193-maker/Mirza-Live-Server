@@ -23,6 +23,7 @@ class StreamHealthMetrics(BaseModel):
         speed_multiplier: Encoding speed ratio (`1.0x` means native real-time).
         is_healthy: Whether encoding speed and update recency are within normal bounds.
         is_frozen: True if no telemetry arrived within `freeze_timeout_seconds` or speed < 0.5x.
+        is_network_error: True if a connection reset or network disconnect signature is caught.
         last_update_time: Unix epoch timestamp (`time.time()`) when metrics were last updated.
     """
 
@@ -33,6 +34,7 @@ class StreamHealthMetrics(BaseModel):
     speed_multiplier: float = Field(default=1.0, ge=0.0)
     is_healthy: bool = Field(default=True)
     is_frozen: bool = Field(default=False)
+    is_network_error: bool = Field(default=False)
     last_update_time: float = Field(default_factory=time.time)
 
 
@@ -41,6 +43,19 @@ _FRAME_REGEX = re.compile(r"frame=\s*(\d+)")
 _FPS_REGEX = re.compile(r"fps=\s*([\d\.]+)")
 _BITRATE_REGEX = re.compile(r"bitrate=\s*([\d\.]+)kbits/s")
 _SPEED_REGEX = re.compile(r"speed=\s*([\d\.]+)x")
+
+# Known network interruption substrings emitted by FFmpeg RTMP/TCP layers
+_NETWORK_ERROR_SIGNATURES = (
+    "Connection reset by peer",
+    "RTMP_Connect0, failed to connect",
+    "Server returned 4",
+    "Server returned 5",
+    "Broken pipe",
+    "Error writing trailer",
+    "Connection timed out",
+    "Network is unreachable",
+    "Input/output error",
+)
 
 
 class StreamHealthMonitor:
@@ -94,9 +109,22 @@ class StreamHealthMonitor:
 
         Returns:
             Optional[StreamHealthMetrics]: Updated `StreamHealthMetrics` if the line contained
-                progress telemetry, or None if it was general log info/startup text.
+                progress telemetry or network errors, or None if it was general startup text.
         """
-        if not line or "frame=" not in line:
+        if not line:
+            return None
+
+        # Check for network disconnection signatures first
+        for signature in _NETWORK_ERROR_SIGNATURES:
+            if signature.lower() in line.lower():
+                self.logger.error(
+                    f"[StreamHealth] NETWORK INTERRUPTION DETECTED on '{self.channel_id}': {line.strip()}"
+                )
+                self._metrics.is_healthy = False
+                self._metrics.is_network_error = True
+                return self._metrics
+
+        if "frame=" not in line:
             return None
 
         frame_match = _FRAME_REGEX.search(line)

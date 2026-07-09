@@ -76,16 +76,38 @@ pip install -r requirements.txt
 
 ## 💻 Command Line Usage (`main.py`)
 
-Mirza Live Server provides three clean CLI subcommands:
+Mirza Live Server provides six clean CLI subcommands for production operations and diagnostics:
 
-### Validate Configuration
-Check that `config.yaml` is valid, environment variables are set, `ffmpeg` is installed, and media files exist:
+### 1. Pre-Flight Health Check (`doctor`)
+Run a comprehensive diagnosis of system prerequisites, Python version (`3.12+`), folder read/write permissions, disk space availability, FFmpeg executable status, and outbound RTMP connectivity to YouTube Live:
+```powershell
+python main.py doctor
+```
+
+### 2. Dry-Run Simulation (`dry-run`)
+Validate configuration profiles, check media directory health (`ffprobe` verification), generate the safe `concat.txt` playlist, and print the exact YouTube Live CBR/GOP FFmpeg command without initiating an internet connection or streaming:
+```powershell
+python main.py dry-run
+# Or run targeting a specific channel:
+python main.py dry-run --channel channel_main
+# Or run via start flag:
+python main.py start --dry-run
+```
+
+### 3. Validate Configuration (`validate`)
+Inspect `config.yaml` syntax, Pydantic type constraints, environment secret resolution, and scan media folders:
 ```powershell
 python main.py validate
 ```
 
-### Start Livestream Server
-Start all enabled channels defined in `config.yaml`:
+### 4. Verify System Dependencies (`verify`)
+Quickly verify that `ffmpeg` binary and core Python libraries (`pydantic`, `psutil`, `yaml`, `dotenv`) are loaded:
+```powershell
+python main.py verify
+```
+
+### 5. Start Livestream Server (`start`)
+Launch the asynchronous supervision loop for all enabled channels defined in `config.yaml`:
 ```powershell
 python main.py start
 ```
@@ -95,11 +117,44 @@ Start a single specific channel by ID:
 python main.py start --channel channel_main
 ```
 
-### Check Status
-View running channels, uptime, memory/CPU consumption, and auto-restart counts:
+### 6. Check Real-Time Status (`status`)
+Inspect host CPU utilization (`psutil`), RAM consumption, and channel media folder counts:
 ```powershell
 python main.py status
 ```
+
+---
+
+## ⚡ Windows Automatic Startup Setup (`scripts/`)
+
+To run Mirza Live Server automatically in the background on your Windows machine 24/7 immediately after logging in (or at system boot), we provide PowerShell utilities using Windows Task Scheduler:
+
+### Register Automatic Startup Task
+Open PowerShell as **Administrator** and run:
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\register_startup.ps1
+```
+- Creates a persistent scheduled task named **`MirzaLiveServer_24_7`**.
+- Runs `python main.py start` in the background with `HighestAvailable` privileges upon user logon.
+- Automatically retries up to 3 times if interrupted during OS boot.
+
+### Unregister / Remove Startup Task
+If you want to stop background scheduling and remove the task:
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\unregister_startup.ps1
+```
+
+---
+
+## 🛡️ Production Finalization & Resilience Upgrades
+
+Mirza Live Server incorporates hardened production capabilities to guarantee continuous 24/7 broadcasting without intervention:
+- **Media Validator (`src/mirza/playlist/validator.py`)**: Before querying FFmpeg, videos undergo deep `ffprobe` inspection (`H.264`/`AAC` codec check, frame rate checking, corrupted header detection). Corrupted or invalid media files are automatically skipped and excluded from `concat.txt`.
+- **Directory Modification Caching (`st_mtime`)**: `MediaDetector` caches folder timestamps so redundant disk scans are bypassed when media folders remain unchanged (`O(1)` verification).
+- **Network Interruption Signatures**: `StreamHealthMonitor` captures RTMP drops (`Connection reset by peer`, `RTMP_Connect0`, `Server returned 4XX/5XX`, `Broken pipe`), immediately triggering an exponential backoff auto-restart (`ChannelSupervisor`).
+- **Crash Diagnostic Reports (`CrashReport`)**: Whenever FFmpeg exits unexpectedly or drops due to network/freeze events, a structured diagnostic artifact is saved to `logs/crash_<channel_id>_<timestamp>.json` recording CPU/RAM state, exit code, current media file, and the last 15 raw stderr lines.
+- **Config Backup Protection (`config.yaml.bak`)**: Prior to persisting configuration changes, `save_config` automatically generates a backup `.bak` snapshot to prevent corruption.
+- **Daily Rotating Logs & FFmpeg Isolation**: System logs rotate daily at midnight (`TimedRotatingFileHandler`, 30-day retention). Raw FFmpeg progress output is isolated inside `logs/<channel_id>_ffmpeg.log` (14-day retention).
 
 ---
 

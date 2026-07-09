@@ -112,7 +112,7 @@ class Orchestrator:
         self.logger.info("All targeted channel supervisors booted successfully.")
 
     async def stop_all(self) -> None:
-        """Concurrently stops all active channel supervisors (`asyncio.gather`)."""
+        """Concurrently stops all active channel supervisors (`asyncio.gather`) and flushes logs."""
         if not self._supervisors:
             self.logger.info("No active supervisors to stop.")
             return
@@ -122,6 +122,7 @@ class Orchestrator:
         await asyncio.gather(*stop_tasks, return_exceptions=True)
         self._supervisors.clear()
         self.logger.info("All channel supervisors shut down cleanly.")
+        logging.shutdown()
 
     def get_channel_summaries(self) -> List[ChannelStateSummary]:
         """Collects real-time state snapshots across all registered channel supervisors.

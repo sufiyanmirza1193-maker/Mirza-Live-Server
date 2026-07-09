@@ -1,23 +1,25 @@
-"""Configuration loading and environment variable resolution engine.
+"""Configuration loading, backup, and environment variable resolution engine.
 
 Parses `config.yaml`, recursively resolves `${ENV_VAR}` template strings using
-system environment and `.env` files (`python-dotenv`), and validates the result
-against strict Pydantic data models.
+system environment and `.env` files (`python-dotenv`), formats clean user-facing
+validation errors, and creates automatic backups (`config.yaml.bak`) prior to modification.
 """
 
 import os
 import re
+import shutil
 from pathlib import Path
 from typing import Any, Dict
 
 import yaml
 from dotenv import load_dotenv
+from pydantic import ValidationError
 
 from mirza.config.models import AppConfig
 
 
 class ConfigLoadError(Exception):
-    """Raised when the configuration YAML file cannot be located or parsed."""
+    """Raised when the configuration YAML file cannot be located, parsed, or validated."""
 
 
 class EnvVariableMissingError(Exception):
@@ -101,9 +103,8 @@ def load_config(
         AppConfig: Validated Pydantic master configuration object.
 
     Raises:
-        ConfigLoadError: If `config_path` does not exist or has invalid YAML syntax.
+        ConfigLoadError: If `config_path` does not exist, has syntax errors, or fails schema validation.
         EnvVariableMissingError: If required environment variable placeholders are undefined.
-        pydantic.ValidationError: If resolved configuration fails type or rule validation.
     """
     # Load .env variables into environment if file exists
     if dotenv_path.exists():
@@ -129,5 +130,44 @@ def load_config(
     # Substitute environment variables throughout the parsed dictionary
     resolved_data = resolve_env_vars(raw_yaml_data)
 
-    # Validate against strict Pydantic V2 models
-    return AppConfig.model_validate(resolved_data)
+    # Validate against strict Pydantic V2 models with human-friendly formatting
+    try:
+        return AppConfig.model_validate(resolved_data)
+    except ValidationError as val_err:
+        formatted_errors = []
+        for error in val_err.errors():
+            loc = " -> ".join(str(part) for part in error.get("loc", []))
+            msg = error.get("msg", "Invalid value")
+            formatted_errors.append(f"  • Field [{loc}]: {msg}")
+        
+        error_details = "\n".join(formatted_errors)
+        raise ConfigLoadError(f"Configuration validation failed in '{config_path}':\n{error_details}") from val_err
+
+
+def save_config(
+    app_config: AppConfig,
+    config_path: Path = Path("config.yaml"),
+) -> Path:
+    """Saves an `AppConfig` model to YAML, automatically creating a `.bak` backup first.
+
+    Whenever modifications are written to `config.yaml`, the existing file on disk
+    is copied to `config.yaml.bak` to guarantee effortless rollback if needed.
+
+    Args:
+        app_config: Validated configuration instance to save.
+        config_path: Target YAML path to write (`config.yaml`).
+
+    Returns:
+        Path: Path where the configuration was successfully written.
+    """
+    if config_path.exists():
+        backup_path = config_path.with_name(f"{config_path.name}.bak")
+        shutil.copy2(config_path, backup_path)
+
+    # Convert Pydantic model to clean dictionary representation
+    data = app_config.model_dump(mode="python", exclude_none=True)
+
+    with open(config_path, "w", encoding="utf-8") as file:
+        yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+
+    return config_path

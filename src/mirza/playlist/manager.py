@@ -72,11 +72,15 @@ class PlaylistManager:
         """Returns total number of completed playlist rotations."""
         return self._loop_count
 
-    def refresh_playlist(self) -> bool:
+    def refresh_playlist(self, force: bool = False) -> bool:
         """Scans the media folder, detects changes, and orders the playlist queue.
 
         If `shuffle: true` is configured, randomizes order using `random.shuffle`.
-        Otherwise, orders sequentially by file path.
+        Otherwise, orders sequentially by file path. If no folder changes are detected
+        and `force` is False, preserves existing sequence to minimize redundant I/O.
+
+        Args:
+            force: If True, forces re-scanning and re-shuffling even if folder is unchanged.
 
         Returns:
             bool: True if new items were detected or order refreshed.
@@ -97,6 +101,10 @@ class PlaylistManager:
                 f"Media folder '{self.detector.media_folder}' contains no supported videos (.mp4, .mkv, .mov, etc.)."
             )
 
+        if not force and self._items and not has_changed:
+            self.logger.debug(f"Playlist unchanged (`{len(self._items)}` items). Reusing cached sequence.")
+            return False
+
         self._items = list(scanned_items)
 
         if self.settings.shuffle:
@@ -106,7 +114,7 @@ class PlaylistManager:
             # Sequential ordering is already sorted alphabetically by the detector
             self.logger.debug(f"Playlist sorted sequentially ({len(self._items)} items).")
 
-        return has_changed or bool(self._items)
+        return True
 
     def get_next_item(self) -> Optional[MediaItem]:
         """Advances the queue and returns the next video item to play.
