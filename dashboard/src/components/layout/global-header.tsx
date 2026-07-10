@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 import { useShell } from "@/context/shell-context"
 import { ProfileMenu } from "@/components/layout/profile-menu"
 import { WorkspaceSwitcher } from "@/components/layout/workspace-switcher"
+import { ThemeSelector } from "@/components/layout/theme-selector"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sub-component: Status Pill
@@ -52,7 +53,7 @@ function StatusPill({
 // Global Header
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function GlobalHeader() {
+function GlobalHeaderComponent() {
   const {
     liveChannelCount,
     totalChannelCount,
@@ -81,7 +82,7 @@ export function GlobalHeader() {
   }, [])
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-12 flex items-center px-4 gap-3 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] backdrop-blur-xl transition-colors duration-200">
+    <header className="fixed top-0 left-0 right-0 z-50 h-12 flex items-center px-4 gap-3 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] shadow-[0_1px_12px_rgba(0,0,0,0.03)] backdrop-blur-xl transition-all duration-300">
       {/* ── Signature Mirza Glass Pill Identity ──────────────────────────────── */}
       <Link
         href="/"
@@ -100,6 +101,9 @@ export function GlobalHeader() {
 
       {/* ── Workspace Switcher ────────────────────────────────── */}
       <WorkspaceSwitcher />
+
+      {/* ── Dedicated Theme Switcher ───────────────────────────── */}
+      <ThemeSelector />
 
       {/* ── Divider ───────────────────────────────────────────── */}
       <div className="h-5 w-px bg-[var(--border-subtle)] hidden lg:block" />
@@ -220,4 +224,6 @@ export function GlobalHeader() {
     </header>
   )
 }
+
+export const GlobalHeader = React.memo(GlobalHeaderComponent)
 

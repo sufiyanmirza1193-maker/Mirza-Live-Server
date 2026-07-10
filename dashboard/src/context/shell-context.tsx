@@ -38,19 +38,21 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
     (a: AlertItem) => a.level === "CRITICAL"
   ).length
 
-  const value: ShellContextValue = {
+  const toggleSidebar = React.useCallback(() => {
+    setSidebarCollapsed((prev) => !prev)
+  }, [])
+
+  const value: ShellContextValue = React.useMemo(() => ({
     sidebarCollapsed,
     setSidebarCollapsed,
-    toggleSidebar: () => setSidebarCollapsed((prev) => !prev),
+    toggleSidebar,
     cpuPercent,
     criticalAlertCount,
     wsConnected: connected,
     systemHealthScore: systemHealth.healthScore,
-    // These will be driven by actual worker state in Milestone 2.
-    // Hardcoded to realistic defaults for Milestone 1.
     liveChannelCount: 1,
     totalChannelCount: 2,
-  }
+  }), [sidebarCollapsed, toggleSidebar, cpuPercent, criticalAlertCount, connected, systemHealth.healthScore])
 
   return <ShellContext.Provider value={value}>{children}</ShellContext.Provider>
 }

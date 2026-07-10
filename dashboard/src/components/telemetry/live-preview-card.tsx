@@ -18,7 +18,7 @@ export interface StreamPreviewProps {
   rtmpUrl: string
 }
 
-export function LiveStreamPreviewSection({
+function LiveStreamPreviewSectionComponent({
   streams = [
     {
       channelId: "channel_main",
@@ -220,8 +220,8 @@ export function LiveStreamPreviewSection({
                   <span className="text-base font-bold text-[#10B981] mt-1">{renderElapsed(stream.elapsedSeconds)}</span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] flex flex-col justify-between">
-                  <span className="text-[#888888] text-[10px] flex items-center gap-1">
+                <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex flex-col justify-between">
+                  <span className="text-[var(--text-muted)] text-[10px] flex items-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-[#10B981]" /> QUALITY
                   </span>
                   <span className="text-base font-bold text-[#10B981] mt-1">{stream.qualityScore}% Excellent</span>
@@ -234,3 +234,5 @@ export function LiveStreamPreviewSection({
     </Card>
   )
 }
+
+export const LiveStreamPreviewSection = React.memo(LiveStreamPreviewSectionComponent)

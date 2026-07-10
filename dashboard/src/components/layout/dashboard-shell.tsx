@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 // Inner shell — reads sidebar state from context
 // ─────────────────────────────────────────────────────────────────────────────
 
-function ShellContent({ children }: { children: React.ReactNode }) {
+const ShellContent = React.memo(function ShellContent({ children }: { children: React.ReactNode }) {
   const { sidebarCollapsed } = useShell()
 
   return (
@@ -38,16 +38,18 @@ function ShellContent({ children }: { children: React.ReactNode }) {
       </main>
     </div>
   )
-}
+})
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DashboardShell — wraps ShellProvider, then renders ShellContent
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+function DashboardShellComponent({ children }: { children: React.ReactNode }) {
   return (
     <ShellProvider>
       <ShellContent>{children}</ShellContent>
     </ShellProvider>
   )
 }
+
+export const DashboardShell = React.memo(DashboardShellComponent)

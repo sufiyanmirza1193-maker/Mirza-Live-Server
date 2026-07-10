@@ -21,7 +21,7 @@ import { useAuth } from "@/context/auth-context"
 import { useTheme, ThemeMode } from "@/context/theme-context"
 import { useWorkspace } from "@/context/workspace-context"
 
-export function ProfileMenu() {
+function ProfileMenuComponent() {
   const { user, logout, isAuthenticated } = useAuth()
   const { theme, setTheme } = useTheme()
   const { activeWorkspace } = useWorkspace()
@@ -225,3 +225,5 @@ export function ProfileMenu() {
     </div>
   )
 }
+
+export const ProfileMenu = React.memo(ProfileMenuComponent)

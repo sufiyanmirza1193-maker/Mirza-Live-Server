@@ -30,18 +30,28 @@ export function ThemeProvider({
     const validTheme = stored && ["dark", "light", "glass"].includes(stored) ? stored : defaultTheme
     setThemeState(validTheme)
     document.documentElement.setAttribute("data-theme", validTheme)
+    document.documentElement.classList.remove("theme-dark", "theme-light", "theme-glass")
+    document.documentElement.classList.add(`theme-${validTheme}`)
   }, [defaultTheme])
 
-  const setTheme = (newTheme: ThemeMode) => {
-    setThemeState(newTheme)
+  const setTheme = React.useCallback((newTheme: ThemeMode) => {
     if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEY, newTheme)
       document.documentElement.setAttribute("data-theme", newTheme)
+      document.documentElement.classList.remove("theme-dark", "theme-light", "theme-glass")
+      document.documentElement.classList.add(`theme-${newTheme}`)
     }
-  }
+    setThemeState(newTheme)
+  }, [])
+
+  const contextValue = React.useMemo(() => ({
+    theme,
+    setTheme,
+    isMounted,
+  }), [theme, setTheme, isMounted])
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, isMounted }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   )

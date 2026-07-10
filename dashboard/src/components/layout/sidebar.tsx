@@ -80,7 +80,7 @@ const EXPERIENCE_CENTERS: ExperienceCenter[] = [
 // Nav Item — single experience center link
 // ─────────────────────────────────────────────────────────────────────────────
 
-function NavItem({
+function NavItemComponent({
   center,
   isActive,
   collapsed,
@@ -100,15 +100,16 @@ function NavItem({
           ? "h-10 w-10 justify-center mx-auto"
           : "h-10 px-3 gap-3 w-full",
         isActive
-          ? "bg-[var(--bg-elevated)] text-[var(--text-primary)] font-semibold shadow-sm"
-          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]"
+          ? "bg-[var(--primary-surface)] text-[var(--text-primary)] font-bold shadow-sm border border-[#FF5A1F]/30"
+          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] hover:border-[var(--border-subtle)] border border-transparent"
       )}
     >
       {/* Active left accent bar */}
       {isActive && (
-        <span className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r-full bg-[#FF5A1F]" />
+        <span className="absolute left-0 top-2 bottom-2 w-[3.5px] rounded-r-full bg-[#FF5A1F] shadow-[0_0_8px_rgba(255,90,31,0.5)]" />
       )}
 
+      {/* Icon — accent if active */}
       <Icon
         className={cn(
           "h-4 w-4 shrink-0 transition-colors",
@@ -118,22 +119,21 @@ function NavItem({
         )}
       />
 
+      {/* Label */}
       {!collapsed && (
-        <span
-          className={cn(
-            "text-sm font-medium truncate transition-colors",
-            isActive ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]"
-          )}
-        >
-          {center.title}
-        </span>
+        <span className="text-xs tracking-wide truncate">{center.title}</span>
+      )}
+
+      {/* Hover glow for collapsed item */}
+      {collapsed && (
+        <span className="absolute inset-0 rounded-xl bg-[var(--bg-elevated)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none -z-10" />
       )}
     </Link>
   )
 
   if (collapsed) {
     return (
-      <Tooltip>
+      <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>{inner}</TooltipTrigger>
         <TooltipContent
           side="right"
@@ -150,11 +150,13 @@ function NavItem({
   return inner
 }
 
+const NavItem = React.memo(NavItemComponent)
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Sidebar
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function Sidebar() {
+function SidebarComponent() {
   const pathname = usePathname()
   const { sidebarCollapsed, toggleSidebar, systemHealthScore } = useShell()
   const { activeWorkspace } = useWorkspace()
@@ -164,7 +166,7 @@ export function Sidebar() {
       <aside
         className={cn(
           "fixed top-12 left-0 bottom-0 z-40 flex flex-col",
-          "bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] backdrop-blur-xl",
+          "bg-[var(--bg-surface)] border-r border-[var(--border-subtle)] shadow-[4px_0_24px_rgba(0,0,0,0.03)] backdrop-blur-xl",
           "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
           sidebarCollapsed ? "w-14" : "w-[220px]"
         )}
@@ -272,3 +274,5 @@ export function Sidebar() {
     </TooltipProvider>
   )
 }
+
+export const Sidebar = React.memo(SidebarComponent)

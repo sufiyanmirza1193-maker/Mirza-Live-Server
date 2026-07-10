@@ -18,7 +18,7 @@ export interface SystemHealthProps {
   healthScore: number
 }
 
-export function SystemHealthPanel({
+function SystemHealthPanelComponent({
   health = {
     cpu: 24.2,
     ram: 13.1,
@@ -46,26 +46,26 @@ export function SystemHealthPanel({
   }
 
   return (
-    <Card className="glass-card flex flex-col justify-between h-full">
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#1C1C1C]">
+    <Card className="bg-[var(--bg-card)] border-[var(--border-subtle)] shadow-md flex flex-col justify-between h-full overflow-hidden">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/30">
         <div>
-          <CardTitle className="text-base font-bold text-white flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-[#10B981]" /> Physical Host Hardware &amp; System Health
+          <CardTitle className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2 font-sans">
+            <ShieldCheck className="h-4 w-4 text-[#10B981]" /> Physical Host Hardware & System Health
           </CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
             Continuous polling of Windows NT telemetry (`psutil` / NVENC engine load)
           </CardDescription>
         </div>
 
-        <div className="flex items-center gap-2 bg-[#090909] px-3 py-1.5 rounded-xl border border-[#1C1C1C] text-xs font-mono">
-          <span className="text-[#888888]">Overall Health:</span>
+        <div className="flex items-center gap-2 bg-[var(--bg-surface)] px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] text-xs font-mono">
+          <span className="text-[var(--text-muted)]">Overall Health:</span>
           <span className="font-bold tracking-tight" style={{ color: getHealthColor(health.healthScore) }}>
             {health.healthScore} / 100
           </span>
         </div>
       </CardHeader>
 
-      <CardContent className="p-4 space-y-4">
+      <CardContent className="p-4 sm:p-5 space-y-4">
         {/* 4 Circular Gauges Row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <CircularGauge
@@ -99,40 +99,42 @@ export function SystemHealthPanel({
         </div>
 
         {/* 4 Bottom Metric Pills Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs pt-2 border-t border-[#1C1C1C]/60">
-          <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] flex flex-col justify-between">
-            <span className="text-[#888888] text-[10px] flex items-center gap-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs pt-2 border-t border-[var(--border-subtle)]">
+          <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col justify-between">
+            <span className="text-[var(--text-muted)] text-[10px] flex items-center gap-1">
               <Thermometer className="h-3 w-3 text-[#F59E0B]" /> TEMPERATURE
             </span>
-            <span className="text-sm font-bold text-white mt-1">{health.temperature.toFixed(1)}°C</span>
-            <span className="text-[10px] text-[#10B981]">Optimal Thermal</span>
+            <span className="text-sm font-bold text-[var(--text-primary)] mt-1">{health.temperature.toFixed(1)}°C</span>
+            <span className="text-[10px] text-[#10B981] font-semibold">Optimal Thermal</span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] flex flex-col justify-between">
-            <span className="text-[#888888] text-[10px] flex items-center gap-1">
+          <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col justify-between">
+            <span className="text-[var(--text-muted)] text-[10px] flex items-center gap-1">
               <Network className="h-3 w-3 text-[#3B82F6]" /> NETWORK I/O
             </span>
-            <span className="text-sm font-bold text-white mt-1">{health.networkSpeed.toFixed(1)} Mbps</span>
-            <span className="text-[10px] text-[#888888]">Full Duplex</span>
+            <span className="text-sm font-bold text-[var(--text-primary)] mt-1">{health.networkSpeed.toFixed(1)} Mbps</span>
+            <span className="text-[10px] text-[var(--text-secondary)]">Full Duplex</span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] flex flex-col justify-between">
-            <span className="text-[#888888] text-[10px] flex items-center gap-1">
+          <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col justify-between">
+            <span className="text-[var(--text-muted)] text-[10px] flex items-center gap-1">
               <Clock className="h-3 w-3 text-[#10B981]" /> HOST UPTIME
             </span>
-            <span className="text-sm font-bold text-white mt-1">{formatUptime(health.uptimeSec)}</span>
-            <span className="text-[10px] text-[#10B981]">mirza.lock ok</span>
+            <span className="text-sm font-bold text-[var(--text-primary)] mt-1">{formatUptime(health.uptimeSec)}</span>
+            <span className="text-[10px] text-[#10B981] font-semibold">mirza.lock ok</span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] flex flex-col justify-between">
-            <span className="text-[#888888] text-[10px] flex items-center gap-1">
+          <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex flex-col justify-between">
+            <span className="text-[var(--text-muted)] text-[10px] flex items-center gap-1">
               <Activity className="h-3 w-3 text-[#FF5A1F]" /> DIAGNOSTIC
             </span>
             <span className="text-sm font-bold text-[#10B981] mt-1">HEALTHY</span>
-            <span className="text-[10px] text-[#888888]">0 Hardware Faults</span>
+            <span className="text-[10px] text-[var(--text-secondary)]">0 Hardware Faults</span>
           </div>
         </div>
       </CardContent>
     </Card>
   )
 }
+
+export const SystemHealthPanel = React.memo(SystemHealthPanelComponent)

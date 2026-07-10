@@ -146,20 +146,20 @@ export default function DashboardPage() {
   return (
     <DashboardShell>
       {/* Top Header Banner & Quick Provisioning */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1C1C1C] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-[var(--border-subtle)] py-8 md:py-10">
         <div>
-          <div className="flex items-center gap-2">
-            <Badge variant="online" className="text-xs px-2.5 py-0.5 font-mono shadow-md">
+          <div className="flex items-center gap-2.5 mb-3">
+            <Badge variant="online" className="text-xs px-3 py-1 font-mono font-bold shadow-sm bg-[var(--primary-surface)] text-[#FF5A1F] border border-[#FF5A1F]/30">
               ENTERPRISE ORCHESTRATOR ONLINE
             </Badge>
-            <span className="text-xs font-mono text-[#888888] hidden md:inline">
-              Mirza Live Platform V2 • WebSocket: {connected ? "Live Supervisor Hook" : "Fallback High-Freq Hub"}
+            <span className="text-xs font-mono text-[var(--text-muted)] hidden md:inline">
+              Mirza Live Platform V3 • WebSocket: {connected ? "Live Supervisor Hook" : "Fallback High-Freq Hub"}
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white mt-1.5 flex items-center gap-2.5">
+          <h1 className="text-4xl md:text-5xl lg:text-[52px] font-black tracking-tight text-[var(--text-primary)] leading-tight flex items-center gap-3">
             Enterprise Command &amp; Telemetry Center
           </h1>
-          <p className="text-[#888888] text-sm mt-1 max-w-3xl">
+          <p className="text-[var(--text-secondary)] text-base md:text-lg font-medium mt-2 max-w-3xl leading-relaxed">
             Real-time multi-channel orchestration, zero-drop RTMP pipelines, and high-density system diagnostics.
           </p>
         </div>
@@ -167,44 +167,44 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="glow" size="sm" className="font-bold px-4 h-9 shadow-lg">
+              <Button variant="glow" size="sm" className="font-bold px-5 h-10 shadow-lg text-xs">
                 <Play className="h-4 w-4 mr-2 fill-white" /> Launch New Channel
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-primary)]">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-white">
+                <DialogTitle className="flex items-center gap-2 text-[var(--text-primary)] font-bold text-lg">
                   <Radio className="h-5 w-5 text-[#FF5A1F]" /> Provision Channel Worker Instance
                 </DialogTitle>
-                <DialogDescription className="text-xs">
+                <DialogDescription className="text-xs text-[var(--text-secondary)]">
                   Configure isolated multi-threaded FFmpeg encoding parameters for continuous RTMP streaming.
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="rounded-xl border border-[#1C1C1C] bg-[#090909] p-4 space-y-3 font-mono text-xs">
+                <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] p-4 space-y-3 font-mono text-xs shadow-sm">
                   <div className="flex justify-between">
-                    <span className="text-[#888888]">Worker ID Identifier</span>
+                    <span className="text-[var(--text-secondary)]">Worker ID Identifier</span>
                     <span className="text-[#10B981] font-bold">channel_aux_3 (Isolated Thread)</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#888888]">Bitrate Constraint</span>
-                    <span className="text-white">4,500 kbps (`-bufsize 9000k`)</span>
+                    <span className="text-[var(--text-secondary)]">Bitrate Constraint</span>
+                    <span className="text-[var(--text-primary)] font-bold">4,500 kbps (`-bufsize 9000k`)</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#888888]">Media Loop Guard</span>
-                    <span className="text-white">Active (`PlaylistManager`)</span>
+                    <span className="text-[var(--text-secondary)]">Media Loop Guard</span>
+                    <span className="text-[var(--text-primary)] font-bold">Active (`PlaylistManager`)</span>
                   </div>
-                  <div className="flex justify-between border-t border-[#1C1C1C]/60 pt-2">
-                    <span className="text-[#888888]">Hardware Acceleration</span>
+                  <div className="flex justify-between border-t border-[var(--border-subtle)] pt-2">
+                    <span className="text-[var(--text-secondary)]">Hardware Acceleration</span>
                     <span className="text-[#FF5A1F] font-bold">NVIDIA NVENC Engine</span>
                   </div>
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-xs">
+                <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
                   Cancel
                 </Button>
-                <Button variant="default" onClick={() => setDialogOpen(false)} className="text-xs font-bold">
+                <Button variant="default" onClick={() => setDialogOpen(false)} className="text-xs font-bold bg-[#FF5A1F] hover:bg-[#FF5A1F]/90 text-white shadow-md">
                   Confirm Provision
                 </Button>
               </DialogFooter>
@@ -214,14 +214,14 @@ export default function DashboardPage() {
       </div>
 
       {/* SECTION 1: High-Density 10-Card Statistics Grid (`StatCard` with Sparklines & Trends) */}
-      <div className="space-y-3">
+      <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-mono font-bold tracking-wider text-[#888888] uppercase flex items-center gap-2">
+          <h2 className="text-sm font-mono font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-[#FF5A1F]" /> High-Frequency KPI Statistics Grid (`1Hz Polling`)
           </h2>
-          <span className="text-xs font-mono text-[#888888]">
+          <span className="text-xs font-mono text-[var(--text-muted)]">
             Last updated:{" "}
-            <span className="text-white tabular-nums">
+            <span className="text-[var(--text-primary)] font-bold tabular-nums">
               {isMounted ? lastUpdated.toLocaleTimeString() : "\u2014"}
             </span>
           </span>
@@ -381,10 +381,10 @@ export default function DashboardPage() {
       {/* SECTION 3: Live Channels / Worker Cards Section */}
       <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-2">
             <Tv className="h-5 w-5 text-[#FF5A1F]" /> Live Channels &amp; Supervised Worker Instances
           </h2>
-          <span className="text-xs text-[#888888] font-mono bg-[#111111] px-2.5 py-1 rounded-lg border border-[#1C1C1C]">
+          <span className="text-xs text-[var(--text-secondary)] font-mono bg-[var(--bg-elevated)] px-2.5 py-1 rounded-lg border border-[var(--border-subtle)]">
             {workers.filter((w) => w.status === "LIVE").length} / {workers.length} Workers LIVE
           </span>
         </div>

@@ -6,7 +6,9 @@
    ───────────────────────────────────────────────────────── */
 
 :root,
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+:root.theme-dark,
+html.theme-dark {
   /* Enterprise Dark (Default) — Vercel / Linear inspired */
   --bg-base:     #060606;   /* body / page canvas */
   --bg-surface:  #0D0D0D;   /* header / sidebar / surface panels */
@@ -20,7 +22,7 @@
 
   /* Brand */
   --primary:         #FF5A1F;
-  --primary-glow:    rgba(255, 90, 31, 0.2);
+  --primary-glow:    rgba(255, 90, 31, 0.25);
   --primary-surface: rgba(255, 90, 31, 0.08);
 
   /* Text hierarchy */
@@ -31,15 +33,15 @@
 
   /* Semantic status */
   --status-live:       #22C55E;
-  --status-live-glow:  rgba(34, 197, 94, 0.2);
+  --status-live-glow:  rgba(34, 197, 94, 0.25);
   --status-warning:    #F59E0B;
   --status-error:      #EF4444;
-  --status-error-glow: rgba(239, 68, 68, 0.2);
+  --status-error-glow: rgba(239, 68, 68, 0.25);
   --status-info:       #3B82F6;
   --status-recovering: #F59E0B;
   --status-offline:    #3A3A3A;
 
-  /* Legacy compatibility (mapped to new tokens) */
+  /* Legacy compatibility */
   --background:         var(--bg-base);
   --foreground:         var(--text-primary);
   --card:               var(--bg-card);
@@ -47,7 +49,7 @@
   --popover:            var(--bg-card);
   --popover-foreground: var(--text-primary);
   --primary-foreground: #FFFFFF;
-  --secondary:          #E53935;
+  --secondary:          #FF5A1F;
   --secondary-foreground: #FFFFFF;
   --muted:              var(--bg-elevated);
   --muted-foreground:   var(--text-secondary);
@@ -61,42 +63,46 @@
   --radius:             0.75rem;
 
   --glass-backdrop-blur: 16px;
-  --glass-card-bg: rgba(17, 17, 17, 0.8);
-  --glass-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.6);
+  --glass-card-bg: rgba(17, 17, 17, 0.85);
+  --glass-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.65);
+  --card-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.5);
+  --card-hover-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 90, 31, 0.25);
 }
 
-:root[data-theme="light"] {
-  /* Enterprise Light — Stripe / Notion inspired */
-  --bg-base:     #F8FAFC;   /* clean crisp canvas */
-  --bg-surface:  #F1F5F9;   /* header / sidebar / surface panels */
-  --bg-card:     #FFFFFF;   /* high-contrast white cards */
-  --bg-elevated: #E2E8F0;   /* active states / hover surfaces */
+:root[data-theme="light"],
+:root.theme-light,
+html.theme-light {
+  /* First-Class Enterprise Light — Engineered for contrast, subtle depth, and floating elegance */
+  --bg-base:     #F6F7FB;   /* clean crisp light canvas */
+  --bg-surface:  #FFFFFF;   /* pristine white header & sidebar with depth */
+  --bg-card:     #FFFFFF;   /* high-contrast floating white cards */
+  --bg-elevated: #FCFCFD;   /* active states / hover surfaces */
 
-  /* Border scale */
-  --border-subtle:  #E2E8F0;  /* subtle dividing lines */
-  --border-default: #CBD5E1;  /* interactive elements */
-  --border-strong:  #94A3B8;  /* focused / active */
+  /* Border scale — crisp layer separation */
+  --border-subtle:  #E5E7EB;  /* subtle dividing lines */
+  --border-default: #D1D5DB;  /* interactive elements */
+  --border-strong:  #9CA3AF;  /* focused / active */
 
-  /* Brand */
+  /* Brand — Primary Orange Identity */
   --primary:         #FF5A1F;
-  --primary-glow:    rgba(255, 90, 31, 0.15);
+  --primary-glow:    rgba(255, 90, 31, 0.22);
   --primary-surface: rgba(255, 90, 31, 0.08);
 
-  /* Text hierarchy */
-  --text-primary:   #0F172A;  /* dark charcoal header text */
-  --text-secondary: #475569;  /* readable secondary text */
-  --text-muted:     #64748B;  /* captions and metadata */
-  --text-disabled:  #94A3B8;
+  /* Text hierarchy — High contrast reading experience */
+  --text-primary:   #111827;  /* deep charcoal header text */
+  --text-secondary: #4B5563;  /* readable secondary text */
+  --text-muted:     #6B7280;  /* captions and metadata */
+  --text-disabled:  #9CA3AF;
 
   /* Semantic status */
   --status-live:       #16A34A;
-  --status-live-glow:  rgba(22, 163, 74, 0.15);
+  --status-live-glow:  rgba(22, 163, 74, 0.2);
   --status-warning:    #D97706;
   --status-error:      #DC2626;
-  --status-error-glow: rgba(220, 38, 38, 0.15);
+  --status-error-glow: rgba(220, 38, 38, 0.2);
   --status-info:       #2563EB;
   --status-recovering: #D97706;
-  --status-offline:    #94A3B8;
+  --status-offline:    #6B7280;
 
   /* Legacy compatibility */
   --background:         var(--bg-base);
@@ -106,7 +112,7 @@
   --popover:            var(--bg-card);
   --popover-foreground: var(--text-primary);
   --primary-foreground: #FFFFFF;
-  --secondary:          #E53935;
+  --secondary:          #FF5A1F;
   --secondary-foreground: #FFFFFF;
   --muted:              var(--bg-elevated);
   --muted-foreground:   var(--text-secondary);
@@ -119,22 +125,26 @@
   --ring:               var(--primary);
   --radius:             0.75rem;
 
-  --glass-backdrop-blur: 12px;
-  --glass-card-bg: rgba(255, 255, 255, 0.9);
-  --glass-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+  --glass-backdrop-blur: 16px;
+  --glass-card-bg: rgba(255, 255, 255, 0.92);
+  --glass-shadow: 0 8px 24px -4px rgba(17, 24, 39, 0.08), 0 2px 6px -1px rgba(17, 24, 39, 0.04);
+  --card-shadow: 0 4px 14px -2px rgba(17, 24, 39, 0.06), 0 2px 6px -1px rgba(17, 24, 39, 0.03);
+  --card-hover-shadow: 0 12px 32px -6px rgba(17, 24, 39, 0.12), 0 4px 12px -2px rgba(17, 24, 39, 0.06), 0 0 0 1px rgba(255, 90, 31, 0.35);
 }
 
-:root[data-theme="glass"] {
+:root[data-theme="glass"],
+:root.theme-glass,
+html.theme-glass {
   /* Transparent Glass Theme — Apple Vision Pro + Vercel signature identity */
   --bg-base:     #050509;   /* deep obsidian ambient canvas */
-  --bg-surface:  rgba(255, 255, 255, 0.035);  /* frosted navigation / sidebar */
-  --bg-card:     rgba(255, 255, 255, 0.055);  /* frosted floating cards */
-  --bg-elevated: rgba(255, 255, 255, 0.09);   /* active / hover frosted panels */
+  --bg-surface:  rgba(255, 255, 255, 0.04);  /* frosted navigation / sidebar */
+  --bg-card:     rgba(255, 255, 255, 0.06);  /* frosted floating cards */
+  --bg-elevated: rgba(255, 255, 255, 0.1);   /* active / hover frosted panels */
 
   /* Border scale */
-  --border-subtle:  rgba(255, 255, 255, 0.1);   /* subtle frosted border */
-  --border-default: rgba(255, 255, 255, 0.18);  /* interactive borders */
-  --border-strong:  rgba(255, 255, 255, 0.32);  /* focused / highlighted border */
+  --border-subtle:  rgba(255, 255, 255, 0.12);  /* subtle frosted border */
+  --border-default: rgba(255, 255, 255, 0.2);   /* interactive borders */
+  --border-strong:  rgba(255, 255, 255, 0.35);  /* focused / highlighted border */
 
   /* Brand */
   --primary:         #FF5A1F;
@@ -143,9 +153,9 @@
 
   /* Text hierarchy */
   --text-primary:   #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.72);
-  --text-muted:     rgba(255, 255, 255, 0.48);
-  --text-disabled:  rgba(255, 255, 255, 0.28);
+  --text-secondary: rgba(255, 255, 255, 0.76);
+  --text-muted:     rgba(255, 255, 255, 0.52);
+  --text-disabled:  rgba(255, 255, 255, 0.3);
 
   /* Semantic status */
   --status-live:       #22C55E;
@@ -179,8 +189,10 @@
   --radius:             0.75rem;
 
   --glass-backdrop-blur: 24px;
-  --glass-card-bg: rgba(255, 255, 255, 0.05);
+  --glass-card-bg: rgba(255, 255, 255, 0.055);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 0 40px -10px rgba(255, 90, 31, 0.15);
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+  --card-hover-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.65), 0 0 30px -5px rgba(255, 90, 31, 0.3);
 }
 
 @theme inline {
@@ -210,6 +222,7 @@
 @layer base {
   * {
     border-color: var(--border-subtle);
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
   }
   body {
     background-color: var(--bg-base);
@@ -236,10 +249,7 @@
   }
   .glass-card-hover:hover {
     border-color: var(--border-default);
-    box-shadow:
-      0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
-      0 12px 32px -8px rgba(0, 0, 0, 0.8),
-      0 0 0 1px rgba(255, 90, 31, 0.2);
+    box-shadow: var(--card-hover-shadow);
     transform: translateY(-2px);
   }
 

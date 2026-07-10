@@ -53,7 +53,7 @@ export default function LoginPage() {
       initial={{ opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.25 }}
-      className="glass-card rounded-2xl p-8 border border-[var(--border-default)] shadow-2xl relative overflow-hidden backdrop-blur-2xl"
+      className="glass-card rounded-2xl p-8 border border-[var(--border-subtle)] shadow-[var(--card-shadow)] relative overflow-hidden backdrop-blur-2xl"
     >
       {/* Top Header */}
       <div className="text-center mb-6">

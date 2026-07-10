@@ -53,14 +53,14 @@ const statusConfig: Record<
   LIVE: {
     label: "LIVE",
     badgeStyle: "bg-[#10B981]/20 text-[#10B981] border-[#10B981]/40 animate-pulse",
-    borderStyle: "border-[#1C1C1C] hover:border-[#FF5A1F]/50",
+    borderStyle: "border-[var(--border-subtle)] hover:border-[#FF5A1F]/50",
     icon: <Radio className="h-3.5 w-3.5 text-[#10B981] animate-pulse" />,
   },
   IDLE: {
     label: "IDLE STANDBY",
-    badgeStyle: "bg-[#888888]/20 text-[#888888] border-[#888888]/40",
-    borderStyle: "border-[#1C1C1C] opacity-90 hover:opacity-100",
-    icon: <CheckCircle2 className="h-3.5 w-3.5 text-[#888888]" />,
+    badgeStyle: "bg-[#888888]/20 text-[var(--text-secondary)] border-[#888888]/40",
+    borderStyle: "border-[var(--border-subtle)] opacity-90 hover:opacity-100",
+    icon: <CheckCircle2 className="h-3.5 w-3.5 text-[var(--text-muted)]" />,
   },
   ERROR: {
     label: "ERROR",
@@ -76,13 +76,13 @@ const statusConfig: Record<
   },
   OFFLINE: {
     label: "OFFLINE",
-    badgeStyle: "bg-[#181818] text-[#666666] border-[#1C1C1C]",
-    borderStyle: "border-[#1C1C1C] opacity-75 hover:opacity-95",
-    icon: <Square className="h-3.5 w-3.5 text-[#666666]" />,
+    badgeStyle: "bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border-subtle)]",
+    borderStyle: "border-[var(--border-subtle)] opacity-75 hover:opacity-95",
+    icon: <Square className="h-3.5 w-3.5 text-[var(--text-muted)]" />,
   },
 }
 
-export function WorkerCard({
+function WorkerCardComponent({
   id,
   name,
   rtmpUrl,
@@ -108,20 +108,20 @@ export function WorkerCard({
     <motion.div whileHover={{ y: -3 }} transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}>
       <Card className={`glass-card flex flex-col justify-between overflow-hidden shadow-xl ${cfg.borderStyle} group`}>
         {/* Channel Thumbnail Header Banner */}
-        <div className="relative w-full h-32 bg-[#050505] border-b border-[#1C1C1C] flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#090909] via-[#111111] to-[#20100a] opacity-85 group-hover:scale-105 transition-transform duration-500" />
+        <div className="relative w-full h-32 bg-[var(--bg-elevated)] border-b border-[var(--border-subtle)] flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-tr from-[var(--bg-card)] via-[var(--bg-surface)] to-[var(--primary-surface)] opacity-85 group-hover:scale-105 transition-transform duration-500" />
           
           <div className="z-10 flex items-center gap-3.5 px-5 w-full justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-xl bg-[#090909] border border-[#1C1C1C] flex items-center justify-center shadow-lg group-hover:border-[#FF5A1F]/50 transition-colors">
+              <div className="h-11 w-11 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center shadow-lg group-hover:border-[#FF5A1F]/50 transition-colors">
                 <Tv className="h-5 w-5 text-[#FF5A1F]" />
               </div>
               <div>
-                <CardTitle className="text-base font-bold text-white tracking-tight leading-none group-hover:text-[#FF5A1F] transition-colors">
+                <CardTitle className="text-base font-bold text-[var(--text-primary)] tracking-tight leading-none group-hover:text-[#FF5A1F] transition-colors">
                   {name}
                 </CardTitle>
-                <span className="text-[11px] font-mono text-[#888888] block mt-1">
-                  Worker ID: <span className="text-[#F5F5F5] font-bold">{id}</span>
+                <span className="text-[11px] font-mono text-[var(--text-secondary)] block mt-1">
+                  Worker ID: <span className="text-[var(--text-primary)] font-bold">{id}</span>
                 </span>
               </div>
             </div>
@@ -132,8 +132,8 @@ export function WorkerCard({
             </Badge>
           </div>
 
-          <div className="absolute bottom-2.5 left-4 right-4 flex items-center justify-between z-10 text-[10px] font-mono text-[#888888] bg-[#090909]/85 px-3 py-1 rounded-lg border border-[#1C1C1C]">
-            <span className="truncate max-w-[200px] sm:max-w-[260px] text-[#888888]">{rtmpUrl}</span>
+          <div className="absolute bottom-2.5 left-4 right-4 flex items-center justify-between z-10 text-[10px] font-mono text-[var(--text-secondary)] bg-[var(--bg-card)]/90 px-3 py-1 rounded-lg border border-[var(--border-subtle)] backdrop-blur-md">
+            <span className="truncate max-w-[200px] sm:max-w-[260px] text-[var(--text-secondary)]">{rtmpUrl}</span>
             <span className="font-bold text-[#10B981] shrink-0 flex items-center gap-1">
               <ShieldCheck className="h-3 w-3" /> Health: {healthScore}/100
             </span>
@@ -142,103 +142,101 @@ export function WorkerCard({
 
         {/* Card Content: High Density Metric Grid with Clean Spacing */}
         <CardContent className="p-5 space-y-4 font-mono text-xs">
-          <div className="p-3 rounded-xl bg-[#090909] border border-[#1C1C1C] flex justify-between items-center font-sans">
-            <span className="text-[#888888] text-xs">Current Active Media Loop</span>
-            <span className="text-white font-bold text-xs font-mono truncate max-w-[190px] sm:max-w-[240px]">
+          <div className="p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex justify-between items-center font-sans">
+            <span className="text-[var(--text-secondary)] text-xs">Current Active Media Loop</span>
+            <span className="text-[var(--text-primary)] font-bold text-xs font-mono truncate max-w-[190px] sm:max-w-[240px]">
               {currentVideo || "No active media in queue"}
             </span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-            <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] hover:border-[#1C1C1C]/80 transition-colors">
-              <span className="text-[9px] text-[#888888] block uppercase font-bold tracking-wider">Concurrent Viewers</span>
+            <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-colors">
+              <span className="text-[9px] text-[var(--text-muted)] block uppercase font-bold tracking-wider">Concurrent Viewers</span>
               <span className="text-sm font-bold text-[#3B82F6] mt-0.5 block">{viewers.toLocaleString()}</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] hover:border-[#1C1C1C]/80 transition-colors">
-              <span className="text-[9px] text-[#888888] block uppercase font-bold tracking-wider">Bitrate (`-maxrate`)</span>
-              <span className="text-sm font-bold text-white mt-0.5 block">{bitrate} kbps</span>
+            <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-colors">
+              <span className="text-[9px] text-[var(--text-muted)] block uppercase font-bold tracking-wider">Bitrate (`-maxrate`)</span>
+              <span className="text-sm font-bold text-[var(--text-primary)] mt-0.5 block">{bitrate} kbps</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] hover:border-[#1C1C1C]/80 transition-colors">
-              <span className="text-[9px] text-[#888888] block uppercase font-bold tracking-wider">Framerate (FPS)</span>
+            <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-colors">
+              <span className="text-[9px] text-[var(--text-muted)] block uppercase font-bold tracking-wider">Framerate (FPS)</span>
               <span className="text-sm font-bold text-[#10B981] mt-0.5 block">{fps.toFixed(1)}</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#090909] border border-[#1C1C1C] hover:border-[#1C1C1C]/80 transition-colors">
-              <span className="text-[9px] text-[#888888] block uppercase font-bold tracking-wider">Resolution Sync</span>
-              <span className="text-sm font-bold text-white mt-0.5 block">{resolution}</span>
+            <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-colors">
+              <span className="text-[9px] text-[var(--text-muted)] block uppercase font-bold tracking-wider">Resolution Sync</span>
+              <span className="text-sm font-bold text-[var(--text-primary)] mt-0.5 block">{resolution}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3 text-center pt-1">
-            <div className="p-2.5 rounded-xl bg-[#090909]/80 border border-[#1C1C1C] flex items-center justify-center gap-2 text-xs">
+            <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)]/80 border border-[var(--border-subtle)] flex items-center justify-center gap-2 text-xs">
               <Cpu className="h-3.5 w-3.5 text-[#3B82F6]" />
-              <span className="text-[#888888]">CPU:</span>
-              <span className="text-white font-bold">{cpuUsage}%</span>
+              <span className="text-[var(--text-secondary)]">CPU:</span>
+              <span className="text-[var(--text-primary)] font-bold">{cpuUsage}%</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#090909]/80 border border-[#1C1C1C] flex items-center justify-center gap-2 text-xs">
+            <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)]/80 border border-[var(--border-subtle)] flex items-center justify-center gap-2 text-xs">
               <Database className="h-3.5 w-3.5 text-[#10B981]" />
-              <span className="text-[#888888]">RAM:</span>
-              <span className="text-white font-bold">{ramUsage}%</span>
+              <span className="text-[var(--text-secondary)]">RAM:</span>
+              <span className="text-[var(--text-primary)] font-bold">{ramUsage}%</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#090909]/80 border border-[#1C1C1C] flex items-center justify-center gap-2 text-xs">
+            <div className="p-2.5 rounded-xl bg-[var(--bg-elevated)]/80 border border-[var(--border-subtle)] flex items-center justify-center gap-2 text-xs">
               <Network className="h-3.5 w-3.5 text-[#FF5A1F]" />
-              <span className="text-[#888888]">Net:</span>
-              <span className="text-white font-bold">{networkSpeed} Mb/s</span>
+              <span className="text-[var(--text-secondary)]">Net:</span>
+              <span className="text-[var(--text-primary)] font-bold">{networkSpeed} Mb/s</span>
             </div>
           </div>
         </CardContent>
 
         {/* Card Footer: Remediation & Deep-Dive Actions */}
-        <CardFooter className="p-5 pt-0 flex flex-wrap gap-2.5 justify-end bg-[#111111]/40 border-t border-[#1C1C1C]/50 mt-1">
-          {status !== "LIVE" && status !== "RECOVERING" && onStart && (
-            <Button
-              variant="glow"
-              size="sm"
-              onClick={() => onStart(id)}
-              className="text-xs font-bold h-9 px-3.5"
-            >
-              <Play className="h-3.5 w-3.5 mr-1.5 fill-white" /> Start Worker
-            </Button>
-          )}
+        <CardFooter className="p-4 pt-3 border-t border-[var(--border-subtle)] bg-[var(--bg-surface)]/30 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {status !== "LIVE" && status !== "RECOVERING" && onStart && (
+              <Button
+                variant="glow"
+                size="sm"
+                onClick={() => onStart(id)}
+                className="text-xs font-bold h-9 px-3.5"
+              >
+                <Play className="h-3.5 w-3.5 mr-1.5 fill-white" /> Start
+              </Button>
+            )}
 
-          {(status === "LIVE" || status === "ERROR" || status === "RECOVERING") && onRestart && (
+            {(status === "LIVE" || status === "ERROR" || status === "RECOVERING") && onRestart && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onRestart(id)}
+                className="text-xs h-9 px-3 bg-[var(--bg-card)] hover:bg-[var(--bg-elevated)] border-[var(--border-default)]"
+              >
+                <RotateCcw className="h-3.5 w-3.5 mr-1.5 text-[var(--text-secondary)]" /> Restart
+              </Button>
+            )}
+
+            {(status === "LIVE" || status === "RECOVERING") && onStop && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onStop(id)}
+                className="text-xs h-9 px-3"
+              >
+                <Square className="h-3.5 w-3.5 mr-1.5 fill-white" /> Stop
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"
-              onClick={() => onRestart(id)}
-              className="text-xs h-9 px-3 border-[#1C1C1C] hover:border-[#FF5A1F]/50"
+              onClick={() => onSettings?.(id)}
+              className="text-xs h-9 px-3 bg-[var(--bg-card)] hover:bg-[var(--bg-elevated)] border-[var(--border-default)]"
             >
-              <RotateCcw className="h-3.5 w-3.5 mr-1.5 text-[#FF5A1F]" /> Restart
+              <Settings className="h-3.5 w-3.5 mr-1.5 text-[var(--text-secondary)]" /> Config
             </Button>
-          )}
-
-          {(status === "LIVE" || status === "RECOVERING") && onStop && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onStop(id)}
-              className="text-xs h-9 px-3"
-            >
-              <Square className="h-3.5 w-3.5 mr-1.5 fill-white" /> Stop
-            </Button>
-          )}
+          </div>
 
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (onSettings) onSettings(id)
-              else router.push(`/channels/${id}`)
-            }}
-            className="text-xs h-9 px-3 text-[#888888] hover:text-white border border-[#1C1C1C] bg-[#090909]"
-          >
-            <Settings className="h-3.5 w-3.5 mr-1.5 text-[#888888]" /> Quick Settings
-          </Button>
-
-          <Button
-            variant="default"
             size="sm"
             onClick={() => router.push(`/channels/${id}`)}
-            className="text-xs font-bold h-9 px-4 bg-[#FF5A1F] hover:bg-[#FF5A1F]/90 text-white"
+            className="text-xs font-bold h-9 px-4 bg-[#FF5A1F] hover:bg-[#FF5A1F]/90 text-white shadow-sm shrink-0"
           >
             <Eye className="h-3.5 w-3.5 mr-1.5" /> Open Dashboard
           </Button>
@@ -248,3 +246,4 @@ export function WorkerCard({
   )
 }
 
+export const WorkerCard = React.memo(WorkerCardComponent)

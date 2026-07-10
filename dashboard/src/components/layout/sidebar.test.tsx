@@ -61,11 +61,11 @@ describe('Mirza OS Sidebar — 5 Experience Centers', () => {
   it('applies active state to Channel Fleet when pathname is /channels', () => {
     render(<Sidebar />)
     const channelLink = screen.getByText('Channel Fleet').closest('a')
-    // Active link should have elevated background variable
-    expect(channelLink).toHaveClass('bg-[var(--bg-elevated)]')
-    // Inactive links should not have elevated background variable
+    // Active link should have primary surface background variable
+    expect(channelLink).toHaveClass('bg-[var(--primary-surface)]')
+    // Inactive links should not have primary surface background variable
     const contentLink = screen.getByText('Content Studio').closest('a')
-    expect(contentLink).not.toHaveClass('bg-[var(--bg-elevated)]')
+    expect(contentLink).not.toHaveClass('bg-[var(--primary-surface)]')
   })
 
   it('renders the system status footer', () => {

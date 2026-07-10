@@ -28,8 +28,11 @@ const THEME_INIT_SCRIPT = `
     var stored = localStorage.getItem('mirza_ui_theme');
     var theme = stored && ['dark', 'light', 'glass'].includes(stored) ? stored : 'glass';
     document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-glass');
+    document.documentElement.classList.add('theme-' + theme);
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'glass');
+    document.documentElement.classList.add('theme-glass');
   }
 })();
 `;

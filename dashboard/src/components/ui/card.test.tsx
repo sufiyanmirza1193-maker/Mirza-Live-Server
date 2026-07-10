@@ -19,8 +19,8 @@ describe('Card Enterprise Component', () => {
 
     const card = screen.getByTestId('enterprise-card')
     expect(card).toBeInTheDocument()
-    expect(card.className).toContain('border-[#1C1C1C]')
-    expect(card.className).toContain('bg-[#111111]/90')
+    expect(card.className).toContain('border-[var(--border-subtle)]')
+    expect(card.className).toContain('bg-[var(--bg-card)]')
     expect(screen.getByText('Mirza Telemetry')).toBeInTheDocument()
     expect(screen.getByText('4500k CBR')).toBeInTheDocument()
   })

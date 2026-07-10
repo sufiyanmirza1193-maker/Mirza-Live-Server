@@ -13,7 +13,7 @@ export interface CircularGaugeProps {
   strokeWidth?: number
 }
 
-export function CircularGauge({
+function CircularGaugeComponent({
   label,
   value,
   unit = "%",
@@ -28,7 +28,7 @@ export function CircularGauge({
   const strokeDashoffset = circumference - (clampedValue / 100) * circumference
 
   return (
-    <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-[#090909] border border-[#1C1C1C] hover:border-[#1C1C1C]/80 transition-all">
+    <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] hover:border-[var(--border-default)] transition-all">
       <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
         {/* Background circle */}
         <svg width={size} height={size} className="rotate-[-90deg]">
@@ -37,7 +37,7 @@ export function CircularGauge({
             cy={size / 2}
             r={radius}
             fill="transparent"
-            stroke="#1C1C1C"
+            stroke="var(--border-subtle)"
             strokeWidth={strokeWidth}
           />
           {/* Animated Foreground circle */}
@@ -58,21 +58,23 @@ export function CircularGauge({
 
         {/* Center label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center font-mono">
-          <span className="text-lg font-bold text-white tracking-tighter">
+          <span className="text-lg font-bold text-[var(--text-primary)] tracking-tighter">
             {value.toFixed(0)}
-            <span className="text-xs font-normal text-[#888888]">{unit}</span>
+            <span className="text-xs font-normal text-[var(--text-muted)]">{unit}</span>
           </span>
-          <span className="text-[10px] text-[#888888] uppercase tracking-wider leading-none mt-0.5">
+          <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider leading-none mt-0.5">
             {label}
           </span>
         </div>
       </div>
 
       {sublabel && (
-        <span className="mt-2 text-[11px] font-mono text-[#888888] truncate max-w-full">
+        <span className="mt-2 text-[11px] font-mono text-[var(--text-secondary)] truncate max-w-full">
           {sublabel}
         </span>
       )}
     </div>
   )
 }
+
+export const CircularGauge = React.memo(CircularGaugeComponent)
