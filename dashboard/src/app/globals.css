@@ -1,0 +1,298 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────
+   MIRZA OS — Enterprise Streaming Operating System
+   Design Token System v3.0
+   ───────────────────────────────────────────────────────── */
+
+:root,
+:root[data-theme="dark"] {
+  /* Enterprise Dark (Default) — Vercel / Linear inspired */
+  --bg-base:     #060606;   /* body / page canvas */
+  --bg-surface:  #0D0D0D;   /* header / sidebar / surface panels */
+  --bg-card:     #111111;   /* cards / panels */
+  --bg-elevated: #161616;   /* active states / hover surfaces */
+
+  /* Border scale */
+  --border-subtle:  #1A1A1A;  /* most common border */
+  --border-default: #232323;  /* interactive elements */
+  --border-strong:  #2E2E2E;  /* focused / active */
+
+  /* Brand */
+  --primary:         #FF5A1F;
+  --primary-glow:    rgba(255, 90, 31, 0.2);
+  --primary-surface: rgba(255, 90, 31, 0.08);
+
+  /* Text hierarchy */
+  --text-primary:   #F2F2F2;
+  --text-secondary: #A0A0A0;
+  --text-muted:     #5A5A5A;
+  --text-disabled:  #3A3A3A;
+
+  /* Semantic status */
+  --status-live:       #22C55E;
+  --status-live-glow:  rgba(34, 197, 94, 0.2);
+  --status-warning:    #F59E0B;
+  --status-error:      #EF4444;
+  --status-error-glow: rgba(239, 68, 68, 0.2);
+  --status-info:       #3B82F6;
+  --status-recovering: #F59E0B;
+  --status-offline:    #3A3A3A;
+
+  /* Legacy compatibility (mapped to new tokens) */
+  --background:         var(--bg-base);
+  --foreground:         var(--text-primary);
+  --card:               var(--bg-card);
+  --card-foreground:    var(--text-primary);
+  --popover:            var(--bg-card);
+  --popover-foreground: var(--text-primary);
+  --primary-foreground: #FFFFFF;
+  --secondary:          #E53935;
+  --secondary-foreground: #FFFFFF;
+  --muted:              var(--bg-elevated);
+  --muted-foreground:   var(--text-secondary);
+  --accent:             var(--bg-elevated);
+  --accent-foreground:  var(--primary);
+  --destructive:        var(--status-error);
+  --destructive-foreground: #FFFFFF;
+  --border:             var(--border-subtle);
+  --input:              var(--border-subtle);
+  --ring:               var(--primary);
+  --radius:             0.75rem;
+
+  --glass-backdrop-blur: 16px;
+  --glass-card-bg: rgba(17, 17, 17, 0.8);
+  --glass-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.6);
+}
+
+:root[data-theme="light"] {
+  /* Enterprise Light — Stripe / Notion inspired */
+  --bg-base:     #F8FAFC;   /* clean crisp canvas */
+  --bg-surface:  #F1F5F9;   /* header / sidebar / surface panels */
+  --bg-card:     #FFFFFF;   /* high-contrast white cards */
+  --bg-elevated: #E2E8F0;   /* active states / hover surfaces */
+
+  /* Border scale */
+  --border-subtle:  #E2E8F0;  /* subtle dividing lines */
+  --border-default: #CBD5E1;  /* interactive elements */
+  --border-strong:  #94A3B8;  /* focused / active */
+
+  /* Brand */
+  --primary:         #FF5A1F;
+  --primary-glow:    rgba(255, 90, 31, 0.15);
+  --primary-surface: rgba(255, 90, 31, 0.08);
+
+  /* Text hierarchy */
+  --text-primary:   #0F172A;  /* dark charcoal header text */
+  --text-secondary: #475569;  /* readable secondary text */
+  --text-muted:     #64748B;  /* captions and metadata */
+  --text-disabled:  #94A3B8;
+
+  /* Semantic status */
+  --status-live:       #16A34A;
+  --status-live-glow:  rgba(22, 163, 74, 0.15);
+  --status-warning:    #D97706;
+  --status-error:      #DC2626;
+  --status-error-glow: rgba(220, 38, 38, 0.15);
+  --status-info:       #2563EB;
+  --status-recovering: #D97706;
+  --status-offline:    #94A3B8;
+
+  /* Legacy compatibility */
+  --background:         var(--bg-base);
+  --foreground:         var(--text-primary);
+  --card:               var(--bg-card);
+  --card-foreground:    var(--text-primary);
+  --popover:            var(--bg-card);
+  --popover-foreground: var(--text-primary);
+  --primary-foreground: #FFFFFF;
+  --secondary:          #E53935;
+  --secondary-foreground: #FFFFFF;
+  --muted:              var(--bg-elevated);
+  --muted-foreground:   var(--text-secondary);
+  --accent:             var(--bg-elevated);
+  --accent-foreground:  var(--primary);
+  --destructive:        var(--status-error);
+  --destructive-foreground: #FFFFFF;
+  --border:             var(--border-subtle);
+  --input:              var(--border-subtle);
+  --ring:               var(--primary);
+  --radius:             0.75rem;
+
+  --glass-backdrop-blur: 12px;
+  --glass-card-bg: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="glass"] {
+  /* Transparent Glass Theme — Apple Vision Pro + Vercel signature identity */
+  --bg-base:     #050509;   /* deep obsidian ambient canvas */
+  --bg-surface:  rgba(255, 255, 255, 0.035);  /* frosted navigation / sidebar */
+  --bg-card:     rgba(255, 255, 255, 0.055);  /* frosted floating cards */
+  --bg-elevated: rgba(255, 255, 255, 0.09);   /* active / hover frosted panels */
+
+  /* Border scale */
+  --border-subtle:  rgba(255, 255, 255, 0.1);   /* subtle frosted border */
+  --border-default: rgba(255, 255, 255, 0.18);  /* interactive borders */
+  --border-strong:  rgba(255, 255, 255, 0.32);  /* focused / highlighted border */
+
+  /* Brand */
+  --primary:         #FF5A1F;
+  --primary-glow:    rgba(255, 90, 31, 0.35);
+  --primary-surface: rgba(255, 90, 31, 0.12);
+
+  /* Text hierarchy */
+  --text-primary:   #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-muted:     rgba(255, 255, 255, 0.48);
+  --text-disabled:  rgba(255, 255, 255, 0.28);
+
+  /* Semantic status */
+  --status-live:       #22C55E;
+  --status-live-glow:  rgba(34, 197, 94, 0.3);
+  --status-warning:    #F59E0B;
+  --status-error:      #EF4444;
+  --status-error-glow: rgba(239, 68, 68, 0.3);
+  --status-info:       #60A5FA;
+  --status-recovering: #F59E0B;
+  --status-offline:    rgba(255, 255, 255, 0.3);
+
+  /* Legacy compatibility */
+  --background:         var(--bg-base);
+  --foreground:         var(--text-primary);
+  --card:               var(--bg-card);
+  --card-foreground:    var(--text-primary);
+  --popover:            var(--bg-card);
+  --popover-foreground: var(--text-primary);
+  --primary-foreground: #FFFFFF;
+  --secondary:          #FF5A1F;
+  --secondary-foreground: #FFFFFF;
+  --muted:              var(--bg-elevated);
+  --muted-foreground:   var(--text-secondary);
+  --accent:             var(--bg-elevated);
+  --accent-foreground:  var(--primary);
+  --destructive:        var(--status-error);
+  --destructive-foreground: #FFFFFF;
+  --border:             var(--border-subtle);
+  --input:              var(--border-subtle);
+  --ring:               var(--primary);
+  --radius:             0.75rem;
+
+  --glass-backdrop-blur: 24px;
+  --glass-card-bg: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 0 40px -10px rgba(255, 90, 31, 0.15);
+}
+
+@theme inline {
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-card:               var(--card);
+  --color-card-foreground:    var(--card-foreground);
+  --color-popover:            var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary:            var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary:          var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:              var(--muted);
+  --color-muted-foreground:   var(--muted-foreground);
+  --color-accent:             var(--accent);
+  --color-accent-foreground:  var(--accent-foreground);
+  --color-destructive:        var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border:             var(--border);
+  --color-input:              var(--input);
+  --color-ring:               var(--ring);
+  --font-sans: var(--font-inter), var(--font-outfit), system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, "Cascadia Code", Menlo, monospace;
+}
+
+@layer base {
+  * {
+    border-color: var(--border-subtle);
+  }
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  /* Glass card — depth-aware surface adapting to active theme */
+  .glass-card {
+    background: var(--glass-card-bg);
+    backdrop-filter: blur(var(--glass-backdrop-blur));
+    -webkit-backdrop-filter: blur(var(--glass-backdrop-blur));
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Interactive glass card */
+  .glass-card-hover {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass-card-hover:hover {
+    border-color: var(--border-default);
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+      0 12px 32px -8px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(255, 90, 31, 0.2);
+    transform: translateY(-2px);
+  }
+
+  /* Signature Mirza Glass Pill Identity (Apple Vision Pro / Vercel inspired) */
+  .mirza-glass-pill {
+    background: rgba(255, 90, 31, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 90, 31, 0.25);
+    box-shadow:
+      0 0 24px -6px rgba(255, 90, 31, 0.3),
+      0 4px 16px -2px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Orange primary glow */
+  .glow-primary {
+    box-shadow: 0 0 24px -4px var(--primary-glow);
+  }
+  .glow-border {
+    border-color: rgba(255, 90, 31, 0.45) !important;
+  }
+
+  /* Status live pulse */
+  .pulse-live {
+    animation: pulse-live 2s ease-in-out infinite;
+  }
+  @keyframes pulse-live {
+    0%, 100% { box-shadow: 0 0 4px var(--status-live-glow); opacity: 1; }
+    50% { box-shadow: 0 0 10px var(--status-live-glow); opacity: 0.85; }
+  }
+
+  /* Status error pulse */
+  .pulse-error {
+    animation: pulse-error 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse-error {
+    0%, 100% { box-shadow: 0 0 4px var(--status-error-glow); }
+    50% { box-shadow: 0 0 12px var(--status-error-glow); }
+  }
+
+  /* Scrollbar — thin dark */
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 2px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+

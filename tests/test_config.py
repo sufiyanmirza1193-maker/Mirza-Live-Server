@@ -144,3 +144,34 @@ def test_mirza_context_filter_injection() -> None:
     record_sys = logging.LogRecord("mirza.orchestrator", logging.INFO, "test.py", 20, "system msg", (), None)
     assert ctx_filter.filter(record_sys) is True
     assert "[System]" in record_sys.context_prefix
+
+
+def test_video_encoding_invalid_preset_raises() -> None:
+    """Ensure Pydantic raises ValidationError on unsupported x264 preset names."""
+    with pytest.raises(ValidationError) as exc_info:
+        VideoEncodingConfig(preset="invalid_preset")
+    assert "Invalid x264 preset" in str(exc_info.value)
+
+    # Valid preset passes cleanly and is lowercased
+    valid_cfg = VideoEncodingConfig(preset="VERYFAST")
+    assert valid_cfg.preset == "veryfast"
+
+
+def test_restart_policy_invalid_retry_bounds_raises() -> None:
+    """Ensure Pydantic raises ValidationError if retry_delay_seconds > max_retry_delay_seconds."""
+    from mirza.config.models import RestartPolicy
+
+    with pytest.raises(ValidationError) as exc_info:
+        RestartPolicy(retry_delay_seconds=120, max_retry_delay_seconds=60)
+    assert "retry_delay_seconds cannot be greater than max_retry_delay_seconds" in str(exc_info.value)
+
+    # Valid bounds pass cleanly
+    valid_policy = RestartPolicy(retry_delay_seconds=10, max_retry_delay_seconds=60)
+    assert valid_policy.retry_delay_seconds == 10
+
+
+def test_channel_config_stream_key_slash_stripping() -> None:
+    """Verify that leading or trailing slashes on stream_key are stripped."""
+    ch = ChannelConfig(channel_id="ch_test", stream_key="/live_secret_key_123/")
+    assert ch.stream_key == "live_secret_key_123"
+

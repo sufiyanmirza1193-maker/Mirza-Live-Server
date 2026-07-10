@@ -6,7 +6,7 @@ global server settings, monitoring parameters, and multi-channel definitions.
 
 from pathlib import Path
 from typing import List
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class VideoEncodingConfig(BaseModel):
@@ -36,6 +36,15 @@ class VideoEncodingConfig(BaseModel):
         if len(parts) != 2 or not all(part.isdigit() and int(part) > 0 for part in parts):
             raise ValueError("Resolution dimensions must be positive integers.")
         return value
+
+    @field_validator("preset")
+    @classmethod
+    def validate_preset(cls, value: str) -> str:
+        """Validates that preset string matches standard x264 profile names."""
+        valid_presets = {"ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow"}
+        if value.lower() not in valid_presets:
+            raise ValueError(f"Invalid x264 preset '{value}'. Must be one of: {', '.join(sorted(valid_presets))}")
+        return value.lower()
 
     @property
     def gop_size(self) -> int:
@@ -92,6 +101,13 @@ class RestartPolicy(BaseModel):
     backoff_multiplier: float = Field(default=2.0, ge=1.0)
     max_retry_delay_seconds: int = Field(default=60, gt=0)
 
+    @model_validator(mode="after")
+    def validate_retry_bounds(self) -> "RestartPolicy":
+        """Ensures base retry delay does not exceed the maximum backoff delay limit."""
+        if self.retry_delay_seconds > self.max_retry_delay_seconds:
+            raise ValueError("retry_delay_seconds cannot be greater than max_retry_delay_seconds.")
+        return self
+
 
 class ChannelConfig(BaseModel):
     """Complete specification for a single YouTube livestream channel.
@@ -128,7 +144,7 @@ class ChannelConfig(BaseModel):
             raise ValueError("stream_key cannot be empty.")
         if value.startswith("${") and value.endswith("}"):
             raise ValueError(f"Unresolved environment variable placeholder in stream_key: {value}")
-        return value.strip()
+        return value.strip().strip("/")
 
 
 class ServerConfig(BaseModel):
