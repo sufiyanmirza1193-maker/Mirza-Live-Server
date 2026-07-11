@@ -12,6 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Circle,
+  Wand2,
+  Tv,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useShell } from "@/context/shell-context"
@@ -45,6 +47,20 @@ const EXPERIENCE_CENTERS: ExperienceCenter[] = [
     icon: LayoutDashboard,
     href: "/",
     exact: true,
+  },
+  {
+    id: "setup-wizard",
+    title: "Setup Wizard",
+    description: "8-Step playlist stream builder",
+    icon: Wand2,
+    href: "/onboarding",
+  },
+  {
+    id: "streams-telemetry",
+    title: "Streams & Encoding",
+    description: "Real-time bitrate & FPS stability",
+    icon: Tv,
+    href: "/streams",
   },
   {
     id: "channel-fleet",
