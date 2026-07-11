@@ -9,7 +9,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
   ReferenceLine,
   BarChart,
   Bar,
@@ -17,7 +16,8 @@ import {
 import { TelemetryPoint } from "@/hooks/use-live-telemetry"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Activity, Cpu, HardDrive, Network, Zap, ListVideo } from "lucide-react"
+import { Activity, Cpu, Network, Zap, ListVideo } from "lucide-react"
+import { BaseTelemetryChart, COMMON_TOOLTIP_STYLE } from "@/components/telemetry/charts/base-chart"
 
 interface ChartProps {
   data: TelemetryPoint[]
@@ -26,25 +26,21 @@ interface ChartProps {
 
 const BitrateChart = React.memo(function BitrateChart({ data, height = 240 }: ChartProps) {
   return (
-    <div style={{ height }} className="w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <defs>
-            <linearGradient id="bitrateColor" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#FF5A1F" stopOpacity={0.45} />
-              <stop offset="95%" stopColor="#FF5A1F" stopOpacity={0.0} />
-            </linearGradient>
-          </defs>
-          <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <YAxis domain={[4450, 4550]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <Tooltip
-            contentStyle={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", borderRadius: "8px", fontSize: "12px", fontFamily: "monospace", color: "var(--text-primary)" }}
-          />
-          <ReferenceLine y={4500} stroke="#10B981" strokeDasharray="3 3" label={{ value: "4500 CBR Strict", fill: "#10B981", fontSize: 10 }} />
-          <Area type="monotone" dataKey="bitrate" stroke="#FF5A1F" strokeWidth={2} fillOpacity={1} fill="url(#bitrateColor)" name="Bitrate (kbps)" isAnimationActive={false} />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
+    <BaseTelemetryChart height={height}>
+      <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <defs>
+          <linearGradient id="bitrateColor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#FF5A1F" stopOpacity={0.45} />
+            <stop offset="95%" stopColor="#FF5A1F" stopOpacity={0.0} />
+          </linearGradient>
+        </defs>
+        <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <YAxis domain={[4450, 4550]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <Tooltip contentStyle={COMMON_TOOLTIP_STYLE} />
+        <ReferenceLine y={4500} stroke="#10B981" strokeDasharray="3 3" label={{ value: "4500 CBR Strict", fill: "#10B981", fontSize: 10 }} />
+        <Area type="monotone" dataKey="bitrate" stroke="#FF5A1F" strokeWidth={2} fillOpacity={1} fill="url(#bitrateColor)" name="Bitrate (kbps)" isAnimationActive={false} />
+      </AreaChart>
+    </BaseTelemetryChart>
   )
 })
 
@@ -52,19 +48,15 @@ export { BitrateChart }
 
 const FpsChart = React.memo(function FpsChart({ data, height = 240 }: ChartProps) {
   return (
-    <div style={{ height }} className="w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <YAxis domain={[25, 32]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <Tooltip
-            contentStyle={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", borderRadius: "8px", fontSize: "12px", fontFamily: "monospace", color: "var(--text-primary)" }}
-          />
-          <ReferenceLine y={30.0} stroke="#10B981" strokeDasharray="3 3" label={{ value: "30.0 FPS Sync", fill: "#10B981", fontSize: 10 }} />
-          <Line type="monotone" dataKey="fps" stroke="#10B981" strokeWidth={2} dot={false} name="FPS" isAnimationActive={false} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <BaseTelemetryChart height={height}>
+      <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <YAxis domain={[25, 32]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <Tooltip contentStyle={COMMON_TOOLTIP_STYLE} />
+        <ReferenceLine y={30.0} stroke="#10B981" strokeDasharray="3 3" label={{ value: "30.0 FPS Sync", fill: "#10B981", fontSize: 10 }} />
+        <Line type="monotone" dataKey="fps" stroke="#10B981" strokeWidth={2} dot={false} name="FPS" isAnimationActive={false} />
+      </LineChart>
+    </BaseTelemetryChart>
   )
 })
 
@@ -72,30 +64,26 @@ export { FpsChart }
 
 const HardwareLoadChart = React.memo(function HardwareLoadChart({ data, height = 240 }: ChartProps) {
   return (
-    <div style={{ height }} className="w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <defs>
-            <linearGradient id="cpuColor" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0} />
-            </linearGradient>
-            <linearGradient id="gpuColor" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#FF5A1F" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#FF5A1F" stopOpacity={0.0} />
-            </linearGradient>
-          </defs>
-          <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <Tooltip
-            contentStyle={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", borderRadius: "8px", fontSize: "12px", fontFamily: "monospace", color: "var(--text-primary)" }}
-          />
-          <Area type="monotone" dataKey="cpu" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#cpuColor)" name="CPU %" isAnimationActive={false} />
-          <Area type="monotone" dataKey="gpu" stroke="#FF5A1F" strokeWidth={2} fillOpacity={1} fill="url(#gpuColor)" name="GPU %" isAnimationActive={false} />
-          <Area type="monotone" dataKey="ram" stroke="#10B981" strokeWidth={2} fillOpacity={0} name="RAM %" isAnimationActive={false} />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
+    <BaseTelemetryChart height={height}>
+      <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <defs>
+          <linearGradient id="cpuColor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0} />
+          </linearGradient>
+          <linearGradient id="gpuColor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#FF5A1F" stopOpacity={0.3} />
+            <stop offset="95%" stopColor="#FF5A1F" stopOpacity={0.0} />
+          </linearGradient>
+        </defs>
+        <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <Tooltip contentStyle={COMMON_TOOLTIP_STYLE} />
+        <Area type="monotone" dataKey="cpu" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#cpuColor)" name="CPU %" isAnimationActive={false} />
+        <Area type="monotone" dataKey="gpu" stroke="#FF5A1F" strokeWidth={2} fillOpacity={1} fill="url(#gpuColor)" name="GPU %" isAnimationActive={false} />
+        <Area type="monotone" dataKey="ram" stroke="#10B981" strokeWidth={2} fillOpacity={0} name="RAM %" isAnimationActive={false} />
+      </AreaChart>
+    </BaseTelemetryChart>
   )
 })
 
@@ -103,25 +91,21 @@ export { HardwareLoadChart }
 
 const NetworkSpeedChart = React.memo(function NetworkSpeedChart({ data, height = 240 }: ChartProps) {
   return (
-    <div style={{ height }} className="w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <defs>
-            <linearGradient id="netInColor" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
-            </linearGradient>
-          </defs>
-          <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <Tooltip
-            contentStyle={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", borderRadius: "8px", fontSize: "12px", fontFamily: "monospace", color: "var(--text-primary)" }}
-          />
-          <Area type="monotone" dataKey="networkIn" stroke="#10B981" strokeWidth={2} fillOpacity={1} fill="url(#netInColor)" name="Network Inbound (Mbps)" isAnimationActive={false} />
-          <Area type="monotone" dataKey="networkOut" stroke="#3B82F6" strokeWidth={1.5} fillOpacity={0} name="Egress (Mbps)" isAnimationActive={false} />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
+    <BaseTelemetryChart height={height}>
+      <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <defs>
+          <linearGradient id="netInColor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#10B981" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="#10B981" stopOpacity={0.0} />
+          </linearGradient>
+        </defs>
+        <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <Tooltip contentStyle={COMMON_TOOLTIP_STYLE} />
+        <Area type="monotone" dataKey="networkIn" stroke="#10B981" strokeWidth={2} fillOpacity={1} fill="url(#netInColor)" name="Network Inbound (Mbps)" isAnimationActive={false} />
+        <Area type="monotone" dataKey="networkOut" stroke="#3B82F6" strokeWidth={1.5} fillOpacity={0} name="Egress (Mbps)" isAnimationActive={false} />
+      </AreaChart>
+    </BaseTelemetryChart>
   )
 })
 
@@ -129,18 +113,14 @@ export { NetworkSpeedChart }
 
 const WorkerPerformanceChart = React.memo(function WorkerPerformanceChart({ data, height = 240 }: ChartProps) {
   return (
-    <div style={{ height }} className="w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-          <Tooltip
-            contentStyle={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-default)", borderRadius: "8px", fontSize: "12px", fontFamily: "monospace", color: "var(--text-primary)" }}
-          />
-          <Bar dataKey="workerLoad" fill="#FF5A1F" radius={[4, 4, 0, 0]} name="Worker Load %" isAnimationActive={false} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <BaseTelemetryChart height={height}>
+      <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <YAxis domain={[0, 100]} stroke="var(--text-muted)" fontSize={11} tickLine={false} />
+        <Tooltip contentStyle={COMMON_TOOLTIP_STYLE} />
+        <Bar dataKey="workerLoad" fill="#FF5A1F" radius={[4, 4, 0, 0]} name="Worker Load %" isAnimationActive={false} />
+      </BarChart>
+    </BaseTelemetryChart>
   )
 })
 
